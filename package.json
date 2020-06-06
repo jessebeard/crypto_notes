@@ -1,0 +1,41 @@
+{
+  "name": "crypto-notes",
+  "version": "1.0.0",
+  "description": "a simple notes app with basic encryption",
+  "main": "src/index.js",
+  "keywords": [],
+  "author": "Jesse Beard",
+  "license": "MIT",
+  "scripts": {
+    "clean": "rm dist/bundle.js",
+    "build-dev": "webpack -d --mode development",
+    "build-prod": "webpack -p --mode production",
+    "start": "webpack-dev-server --hot --mode development"
+  },
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "eslint": "6.7.2",
+    "eslint-plugin-import": "^2.20.1",
+    "eslint-plugin-jsx-a11y": "^6.2.3",
+    "eslint-plugin-react-hooks": "^2.5.0",
+    "moment": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "react-hot-loader": "latest"
+  },
+  "devDependencies": {
+    "@babel/core": "latest",
+    "@babel/preset-env": "^7.10.2",
+    "@babel/preset-react": "latest",
+    "@hot-loader/react-dom": "latest",
+    "babel-loader": "^8.1.0",
+    "css-loader": "^3.5.3",
+    "eslint-plugin-react": "latest",
+    "style-loader": "^1.2.1",
+    "webpack": "latest",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "latest"
+  },
+  "repository": "https://github.com/jessebeard/crypto_notes.git",
+  "private": false
+}
