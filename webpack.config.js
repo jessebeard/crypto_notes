@@ -1,46 +1,50 @@
 const webpack = require('webpack');
 const path = require('path');
 
-const config = {
-  entry: [
-    'react-hot-loader/patch',
-    './src/index.js'
-  ],
+module.exports = {
+  mode: 'development',
+  entry: `${__dirname}/src/index.jsx`,
   output: {
-    path: path.resolve(__dirname, 'dist'),
-    filename: 'bundle.js'
+    path: `${__dirname}/dist/`,
+    filename: 'bundle.js',
   },
   module: {
     rules: [
       {
-        test: /\.(js|jsx)$/,
-        use: 'babel-loader',
-        exclude: /node_modules/
+        enforce: 'pre',
+        test: /\.(jsx)$/,
+        exclude: /node_modules/,
+        use: 'eslint-loader',
       },
       {
-        test: /\.css$/,
+        test: /\.(js|jsx)$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: [
+              '@babel/preset-env',
+              '@babel/preset-react',
+            ],
+          },
+        },
+      },
+      {
+        test: /\.css$/i,
         use: [
           'style-loader',
-          'css-loader'
-        ]
-      }
-    ]
+          {
+            loader: 'css-loader',
+            options: {
+              modules: true,
+            },
+          },
+        ],
+
+      },
+    ],
   },
   resolve: {
-    extensions: [
-      '.js',
-      '.jsx'
-    ],
-    alias: {
-      'react-dom': '@hot-loader/react-dom'
-    }
+    extensions: ['.js', '.jsx'],
   },
-  plugins: [
-    new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /en/)
-  ],
-  devServer: {
-    contentBase: './dist'
-  }
 };
-
-module.exports = config;

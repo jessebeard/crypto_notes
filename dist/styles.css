@@ -1,0 +1,16 @@
+div.divider{
+  line-height: 1.5 em;
+  padding: 1.5em;
+  display: block;
+}
+
+form {
+  margin: 12% auto;
+  line-height: 1.5em;
+  background-color: #f7f7f9;
+  border: 3px solid #f1f1f1;
+  width:61.8%;
+  height: 390px;
+}
+input >
+margin

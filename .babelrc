@@ -1,14 +1,23 @@
 {
-  presets: [
-    [
-      '@babel/preset-env',
-      {
-        modules: false
+
+  "presets": [
+    "@babel/preset-env",
+    ["@babel/preset-react", {
+      "targets": {
+        "node": "current"
       }
+    }]
     ],
-    '@babel/preset-react'
-  ],
-  plugins: [
-    'react-hot-loader/babel'
-  ]
+    "plugins": [
+      ["@babel/plugin-transform-runtime",
+        {
+          "absoluteRuntime": false,
+          "corejs": false,
+          "helpers": true,
+          "regenerator": true,
+          "useESModules": false,
+          "version": "7.0.0-beta.0"
+        }
+      ]
+    ]
 }
