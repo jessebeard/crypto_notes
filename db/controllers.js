@@ -1,6 +1,7 @@
 const entry = require('./index.js');
 
 exports.saveEntry = (note, callback) => {
+  console.log(note);
   const newEntry = new entry(note);
   newEntry.save((err, success) => {
     if (err) {
@@ -13,12 +14,12 @@ exports.saveEntry = (note, callback) => {
 };
 
 
-exports.getEntries = (callback) => {
-  entry.findAll((err, item) => {
+exports.getEntries = (library, callback) => {
+  entry.find({ library }, (err, docs) => {
     if (err) {
       callback(err, null);
     } else {
-      callback(null, item);
+      callback(null, docs);
     }
   });
 };

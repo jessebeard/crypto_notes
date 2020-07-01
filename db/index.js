@@ -14,8 +14,8 @@ const { Schema } = mongoose;
 const entrySchema = new Schema({
   id: mongoose.ObjectId,
   library: String,
-  body: Buffer,
-  title: Buffer,
+  body: String,
+  title: String,
   salt: [Number],
   iv: [Number],
 });
