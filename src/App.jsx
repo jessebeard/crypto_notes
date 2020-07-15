@@ -1,19 +1,24 @@
+/* eslint-disable no-nested-ternary */
 /* eslint-disable no-console */
 /* eslint-disable comma-dangle */
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { useState, useEffect } from 'react';
-// import regeneratorRuntime from 'regenerator-runtime';
+// eslint-disable-next-line no-unused-vars
+import regeneratorRuntime from 'regenerator-runtime';
 import useInput from './utilities/useInput';
 import encrypt from './encryption/encrypt';
 import decrypt from './encryption/decrypt';
 /* **************************************************** *
  *                HELPER FUNCTIONS                      *
+ * JS crypto.subtle stores things in array buffers,     *
+ * this converts them to and from strings for storage,  *
+ * and subsquent decryption                             *
  * **************************************************** */
 function arrayBufferToString(buf) {
   return String.fromCharCode.apply(null, new Uint8Array(buf));
 }
 function stringToArrayBuffer(str) {
-  const buf = new ArrayBuffer(str.length * 2); // 2 bytes for each char
+  const buf = new ArrayBuffer(str.length);
   const bufView = new Uint8Array(buf);
   for (let i = 0, strLen = str.length; i < strLen; i += 1) {
     bufView[i] = str.charCodeAt(i);
