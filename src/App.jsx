@@ -40,6 +40,7 @@ const App = () => {
   const [numEntries, setNumEntries] = useState(0);
   const [currentLibrary, setCurrentLibrary] = useState('');
   const [submit, setSubmit] = useState(false);
+  const [queried, setQueried] = useState(false);
   const handleSubmit = (event) => {
     event.preventDefault();
     setSubmit(true);
@@ -120,6 +121,7 @@ const App = () => {
                 if (f === 0) {
                   setMessages((m) => [...m, [t, b]]);
                   setNumEntries((num) => (num + 1));
+                  setQueried(true);
                   setCurrentLibrary(library);
                 } else {
                   setFailedDecrypts((num) => num + 1);
@@ -130,24 +132,6 @@ const App = () => {
             }
           }
         }).catch((error) => console.log('error line 123', error));
-      //   (async () => {
-      //     const [t, b, f] = await decrypt(password,
-      //       new Uint8Array(entry.salt),
-      //       new Uint8Array(entry.iv),
-      //       stringToArrayBuffer(entry.title),
-      //       stringToArrayBuffer(entry.body));
-      //     if (f === 0) {
-      //       setMessages((m) => [...m, [t, b]]);
-      //       setNumEntries((num) => (num + 1 ));
-      //     } else {
-      //       setFailedDecrypts(failedDecrypts + f);
-      //     }
-      //   }).catch((error) => { console.log('error line 123', error); })();
-      // }
-      // }).catch((error) => {
-      //   // eslint-disable-next-line no-console
-      //   console.log('line 129 App.', error);
-      // });
       setGetEntries(false);
     }
     // eslint-disable-next-line consistent-return
@@ -220,9 +204,11 @@ const App = () => {
       </button>
       {numEntries > 0 && <p>{`decrypted ${numEntries} entries`}</p>}
       {failedDecrypts > 0 && <p>{`failed entries ${failedDecrypts}`}</p>}
-      {numEntries === 0 && failedDecrypts > 0 && <p>try another password</p>}
+      {numEntries === 0 && failedDecrypts > 0
+       && <p>try another password</p>}
       {numEntries === 0 && failedDecrypts === 0
-      && <p>there doesn&#39;t seem to be any notes in that Library!</p>}
+      && queried === true && <p>there doesn&#39;t seem to be any notes in that Library!</p>}
+      {numEntries === 0 && failedDecrypts === 0 && <p>Enter a Library!</p>}
       {messages.map((tuple, i) => (
         <>
           <p className="messageTitle">{tuple[0]}</p>
