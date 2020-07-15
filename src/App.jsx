@@ -27,25 +27,28 @@ function stringToArrayBuffer(str) {
 }
 
 
+/* **************************************************** *
+ *                  MAIN FUNCTION                       *
+ * **************************************************** */
+
 const App = () => {
   const [library, setLibrary] = useInput('');
   const [password, setPassword] = useInput('');
   const [title, setTitle] = useInput('');
   const [body, setBody] = useInput('');
-  // const [messages, setMessages] = useState();
+  const [messages, setMessages] = useState([]);
   const [submit, setSubmit] = useState(false);
   const handleSubmit = (event) => {
     event.preventDefault();
     setSubmit(true);
   };
   useEffect(() => {
+    if (submit === false) return; // prevents useEffect runing twice
     if (password === '') return;
     (async () => {
       const {
         eTitle, eBody, iv, salt,
       } = await encrypt(password, body, title);
-      // eslint-disable-next-line no-console
-      console.log(eTitle, eBody, iv, salt);
       const myHeaders = new Headers([
         ['Content-Type', 'application/json'],
       ]);
@@ -61,8 +64,6 @@ const App = () => {
           body: arrayBufferToString(eBody)
         }),
       };
-      // eslint-disable-next-line no-console
-      console.log(myInit);
       const request = new Request('http://localhost:1337/submit/', myInit);
       fetch(request)
         .then((response) => {
@@ -80,57 +81,82 @@ const App = () => {
           console.error(error);
         });
     })();
+    setSubmit(false);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [submit]);
 
   const [failedDecrypts, setFailedDecrypts] = useState(0);
   const [getEntries, setGetEntries] = useState(false);
-  const [numEntries, setNumEntries] = useState();
+  const [numEntries, setNumEntries] = useState(0);
   const handleGet = (event) => {
     event.preventDefault();
     setGetEntries(true);
   };
   useEffect(() => {
     if (password === '') return;
-    //
     const request = new Request(`http://localhost:1337/query/${library}`);
-
-    fetch(request)
-      .then((response) => {
-        if (response.status === 200) {
-          return response.json();
-        }
-        throw new Error('Something went wrong on api server!');
-      })
-      // eslint-disable-next-line no-console
-      .then((response) => {
-        setNumEntries(response.length);
-        console.log(response.length, numEntries);
-        for (let i = 0; i < response.length; i += 1) {
-          const entry = response[i];
-          console.log(entry);
-          (async () => {
-            const [t, b] = await decrypt(password,
-              setFailedDecrypts,
-              new Uint8Array(entry.salt),
-              new Uint8Array(entry.iv),
-              stringToArrayBuffer(entry.body),
-              stringToArrayBuffer(entry.title));
-            console.log(t, b, entry.iv, entry.salt, failedDecrypts);
-
-          // ...
-          })();
-        }
-      }).catch((error) => {
-        // eslint-disable-next-line no-console
-        console.error(error);
-      });
+    if (getEntries === true) { // prevents useEffect runing twice
+      fetch(request)
+        .then((response) => {
+          if (response.status === 200) {
+            console.log('here 103');
+            return response.json();
+          }
+          throw new Error('Something went wrong on api server!');
+        })
+        .then((response) => {
+          for (let i = 0; i < response.length; i += 1) {
+            const entry = response[i];
+            try {
+              (async () => {
+                const [t, b, f] = await decrypt(password,
+                  new Uint8Array(entry.salt),
+                  new Uint8Array(entry.iv),
+                  stringToArrayBuffer(entry.title),
+                  stringToArrayBuffer(entry.body));
+                if (f === 0) {
+                  setMessages((m) => [...m, [t, b]]);
+                  setNumEntries((num) => (num + 1));
+                } else {
+                  setFailedDecrypts((num) => num + 1);
+                  console.log('here', t, b, f);
+                }
+              })();
+            } catch {
+              setFailedDecrypts((num) => num + 1);
+              console.log('here127', failedDecrypts);
+            }
+          }
+        }).catch((error) => console.log('error line 123', error));
+      //   (async () => {
+      //     const [t, b, f] = await decrypt(password,
+      //       new Uint8Array(entry.salt),
+      //       new Uint8Array(entry.iv),
+      //       stringToArrayBuffer(entry.title),
+      //       stringToArrayBuffer(entry.body));
+      //     if (f === 0) {
+      //       setMessages((m) => [...m, [t, b]]);
+      //       setNumEntries((num) => (num + 1 ));
+      //     } else {
+      //       setFailedDecrypts(failedDecrypts + f);
+      //     }
+      //   }).catch((error) => { console.log('error line 123', error); })();
+      // }
+      // }).catch((error) => {
+      //   // eslint-disable-next-line no-console
+      //   console.log('line 129 App.', error);
+      // });
+      setGetEntries(false);
+    }
+    // eslint-disable-next-line consistent-return
+    return () => { setGetEntries(false); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [getEntries]);
 
 
-  // const { eTitle, eBody, iv, salt } = useEncrypt(password, body, title);
-  // console.log(eTitle, eBody, iv, salt);
+  /* **************************************************** *
+   *                   RENDER JSX                         *
+   * **************************************************** */
 
   return (
     <form onSubmit={(e) => handleSubmit(e)}>
@@ -190,6 +216,20 @@ const App = () => {
       >
         Get Notes and Decrypt
       </button>
+      { failedDecrypts > 0 && <div>{`failed to decrypt ${failedDecrypts} messages`}</div>(numEntries !== 0
+        ? <div>{`decrypted ${numEntries} messages!`}</div>
+        : <div>try another password!</div>)}
+      { failedDecrypts === 0 && (numEntries !== 0
+        ? <div>{`decrypted ${numEntries} messages!`}</div>
+        : <div>there doesn&#39;t seem to be any notes it that Library!</div>)}
+      {messages.map((tuple, i) => (
+        <>
+          <p className="messageTitle">{tuple[0]}</p>
+          <p className="messageBody">{tuple[1]}</p>
+          {messages.length !== i
+          && <div className="msgDivider"> </div>}
+        </>
+      ))}
     </form>
   );
 };
