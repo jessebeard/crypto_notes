@@ -216,12 +216,11 @@ const App = () => {
       >
         Get Notes and Decrypt
       </button>
-      { failedDecrypts > 0 && <div>{`failed to decrypt ${failedDecrypts} messages`}</div>(numEntries !== 0
-        ? <div>{`decrypted ${numEntries} messages!`}</div>
-        : <div>try another password!</div>)}
-      { failedDecrypts === 0 && (numEntries !== 0
-        ? <div>{`decrypted ${numEntries} messages!`}</div>
-        : <div>there doesn&#39;t seem to be any notes it that Library!</div>)}
+      {numEntries > 0 && <p>{`decrypted ${numEntries} entries`}</p>}
+      {failedDecrypts > 0 && <p>{`failed entries ${failedDecrypts}`}</p>}
+      {numEntries === 0 && failedDecrypts > 0 && <p>try another password</p>}
+      {numEntries === 0 && failedDecrypts === 0
+      && <p>there doesn&#39;t seem to be any notes in that Library!</p>}
       {messages.map((tuple, i) => (
         <>
           <p className="messageTitle">{tuple[0]}</p>
