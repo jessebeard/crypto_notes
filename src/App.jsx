@@ -37,6 +37,8 @@ const App = () => {
   const [title, setTitle] = useInput('');
   const [body, setBody] = useInput('');
   const [messages, setMessages] = useState([]);
+  const [numEntries, setNumEntries] = useState(0);
+  const [currentLibrary, setCurrentLibrary] = useState('');
   const [submit, setSubmit] = useState(false);
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -68,16 +70,14 @@ const App = () => {
       fetch(request)
         .then((response) => {
           if (response.status === 201) {
-            return response.json();
+            if (currentLibrary === library) {
+              setMessages((m) => [...m, [title, body]]);
+              setNumEntries((num) => (num + 1));
+            }
           }
           throw new Error('Something went wrong on api server!');
-        })
-        .then((response) => {
-          // eslint-disable-next-line no-console
-          console.debug(response);
-          // ...
         }).catch((error) => {
-          // eslint-disable-next-line no-console
+          alert(error);
           console.error(error);
         });
     })();
@@ -87,15 +87,18 @@ const App = () => {
 
   const [failedDecrypts, setFailedDecrypts] = useState(0);
   const [getEntries, setGetEntries] = useState(false);
-  const [numEntries, setNumEntries] = useState(0);
   const handleGet = (event) => {
     event.preventDefault();
     setGetEntries(true);
   };
   useEffect(() => {
     if (password === '') return;
+    if (library === currentLibrary) return;
     const request = new Request(`http://localhost:1337/query/${library}`);
     if (getEntries === true) { // prevents useEffect runing twice
+      setNumEntries(0);
+      setMessages([]);
+      setFailedDecrypts(0);
       fetch(request)
         .then((response) => {
           if (response.status === 200) {
@@ -117,14 +120,13 @@ const App = () => {
                 if (f === 0) {
                   setMessages((m) => [...m, [t, b]]);
                   setNumEntries((num) => (num + 1));
+                  setCurrentLibrary(library);
                 } else {
                   setFailedDecrypts((num) => num + 1);
-                  console.log('here', t, b, f);
                 }
               })();
             } catch {
               setFailedDecrypts((num) => num + 1);
-              console.log('here127', failedDecrypts);
             }
           }
         }).catch((error) => console.log('error line 123', error));
