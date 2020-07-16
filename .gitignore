@@ -3,4 +3,4 @@ node_modules
 sha1.js
 keyGen.js
 crypt.js
-/dist/bundle.js
+*/bundle.js
