@@ -75,8 +75,9 @@ const App = () => {
               setMessages((m) => [...m, [title, body]]);
               setNumEntries((num) => (num + 1));
             }
+          } else {
+            throw new Error('Something went wrong on api server!');
           }
-          throw new Error('Something went wrong on api server!');
         }).catch((error) => {
           alert(error);
           console.error(error);
