@@ -4,3 +4,4 @@ sha1.js
 keyGen.js
 crypt.js
 */bundle.js
+dist/bundle.js

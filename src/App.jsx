@@ -97,7 +97,7 @@ const App = () => {
     if (password === '') return;
     if (library === currentLibrary) return;
     const request = new Request(`http://localhost:1337/query/${library}`);
-    if (getEntries === true) { // prevents useEffect runing twice
+    if (getEntries === true) { // prevents useEffect running twice
       setNumEntries(0);
       setMessages([]);
       setFailedDecrypts(0);
@@ -146,7 +146,10 @@ const App = () => {
    * **************************************************** */
 
   return (
-    <form onSubmit={(e) => handleSubmit(e)}>
+    <form
+      onSubmit={(e) => handleSubmit(e)}
+      id="inputForm"
+    >
       <label>
         Library?
         <input
@@ -155,6 +158,7 @@ const App = () => {
           placeholder="e.g. Diary"
           value={library}
           onChange={setLibrary}
+          id="libraryInput"
         />
       </label>
       <div className="divider" />
@@ -166,6 +170,7 @@ const App = () => {
           placeholder="don't forget this!"
           value={password}
           onChange={setPassword}
+          id="passwordInput"
         />
       </label>
       <div className="divider" />
@@ -178,6 +183,7 @@ const App = () => {
           placeholder="entries are displayed chronologically"
           value={title}
           onChange={setTitle}
+          id="titleInput"
         />
       </label>
       <div className="divider" />
@@ -188,18 +194,21 @@ const App = () => {
           type="text"
           value={body}
           onChange={setBody}
+          id="bodyInput"
         />
       </label>
       <div className="divider" />
       <div className="divider" />
       <button
         type="submit"
+        id="addEntry"
       >
         Submit
       </button>
       <button
         type="button"
         onClick={(e) => handleGet(e)}
+        id="retrieveEntries"
       >
         Get Notes and Decrypt
       </button>
@@ -210,13 +219,24 @@ const App = () => {
       {numEntries === 0 && failedDecrypts === 0
       && queried === true && <p>there doesn&#39;t seem to be any notes in that Library!</p>}
       {numEntries === 0 && failedDecrypts === 0 && <p>Enter a Library!</p>}
-      {messages.map((tuple, i) => (
-        <>
-          <p className="messageTitle">{tuple[0]}</p>
-          <p className="messageBody">{tuple[1]}</p>
-          {messages.length !== i
-          && <div className="msgDivider"> </div>}
-        </>
+      {messages.map((tuple, i) => {
+        const titleID = `title${i}`;
+        const bodyID = `body${i}`;
+        return (
+          <>
+            <p className="messageTitle"
+              key={titleID}
+              id={titleID}
+            >
+              {tuple[0]}</p>
+            <p className="messageBody"
+              key={bodyID}
+              id={bodyID}
+            >
+              {tuple[1]}</p>
+            {messages.length !== i
+            && <div className="msgDivider"> </div>}
+          </>
       ))}
     </form>
   );
