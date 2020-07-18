@@ -9,49 +9,54 @@ import regeneratorRuntime from 'regenerator-runtime';
 Fetch the contents of the "message" textbox, and encode it
 in a form we can use for the encrypt operation.
 */
-function getMessageEncoding(text) {
+const encodeMessage = (text) => {
   const enc = new TextEncoder();
   return enc.encode(text);
-}
+};
 
-/*
-Get the encoded m essage, encrypt it and display a representation
-of the ciphertext in the "Ciphertext" element.
-*/
-async function encryptMessage(key, text, iv) {
-  const encoded = getMessageEncoding(text);
-  // The iv must never be reused with a given key.
-  // const iv = window.crypto.getRandomValues(new Uint8Array(12));
-  const ciphertext = await window.crypto.subtle.encrypt(
-    {
-      name: 'AES-GCM',
-      iv,
-    },
-    key,
-    encoded,
-  );
-  return ciphertext;
-}
-
-/*
-Fetch the ciphertext and decrypt it.
-Write the decrypted message into the "Decrypted" box.
-*/
-async function decryptMessage(key, iv, ciphertext, cb) {
-  const decrypted = await window.crypto.subtle.decrypt(
-    {
-      name: 'AES-GCM',
-      iv,
-    },
-    key,
-    ciphertext,
-  );
-
+const decodeMessage = (string) => {
   const dec = new TextDecoder();
-  cb(dec.decode(decrypted));
+  return dec.decode(string);
+};
+
+/*
+  Get some key material to use as input to the deriveKey method.
+  The key material is a password supplied by the user.
+  */
+function getKeyMaterial(password) {
+  const enc = new TextEncoder();
+  return window.crypto.subtle.importKey(
+    'raw',
+    enc.encode(password),
+    { name: 'PBKDF2' },
+    false,
+    ['deriveBits', 'deriveKey'],
+  );
 }
 
-export { encryptMessage, decryptMessage };
+/*
+  Given some key material and salt
+  derive an AES-GCM key using PBKDF2.
+  */
+function getKey(cryptoKey, salt) {
+  return window.crypto.subtle.deriveKey(
+    {
+      name: 'PBKDF2',
+      salt,
+      iterations: 100000,
+      hash: 'SHA-256',
+    },
+    cryptoKey,
+    { name: 'AES-GCM', length: 256 },
+    true,
+    ['encrypt', 'decrypt'],
+  );
+}
+
+
+export {
+  getKeyMaterial, getKey, encodeMessage, decodeMessage,
+};
 
 /*
 Generate an encryption key, then set up event listeners
