@@ -1,6 +1,7 @@
 env:
   browser: true
   es2020: true
+  node: true
 extends:
   - 'plugin:react/recommended'
   - airbnb
@@ -11,8 +12,4 @@ parserOptions:
   sourceType: module
 plugins:
   - react
-  - react-hooks
-rules: {
-  "react-hooks/rules-of-hooks": "error",
-  "react-hooks/exhaustive-deps": "warn"
-}
+rules: {}

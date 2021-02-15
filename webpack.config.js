@@ -1,5 +1,6 @@
 const webpack = require('webpack');
 const path = require('path');
+const ESLintPlugin = require('eslint-webpack-plugin');
 
 module.exports = {
   mode: 'development',
@@ -10,12 +11,12 @@ module.exports = {
   },
   module: {
     rules: [
-      {
-        enforce: 'pre',
-        test: /\.(jsx)$/,
-        exclude: /node_modules/,
-        use: 'eslint-loader',
-      },
+      // {
+      //   enforce: 'pre',
+      //   test: /\.(jsx)$/,
+      //   exclude: /node_modules/,
+      //   use: 'eslint-loader',
+      // },
       {
         test: /\.(js|jsx)$/,
         exclude: /node_modules/,
@@ -47,4 +48,5 @@ module.exports = {
   resolve: {
     extensions: ['.js', '.jsx'],
   },
+  plugins: [new ESLintPlugin()],
 };
