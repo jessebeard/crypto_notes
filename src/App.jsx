@@ -3,11 +3,10 @@
 /* eslint-disable comma-dangle */
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { useState, useEffect } from 'react';
-// eslint-disable-next-line no-unused-vars
-import regeneratorRuntime from 'regenerator-runtime';
 import useInput from './utilities/useInput';
 import encrypt from './encryption/encrypt';
 import decrypt from './encryption/decrypt';
+import DeleteButton from './artifacts/DeleteButton'
 /* **************************************************** *
  *                HELPER FUNCTIONS                      *
  * JS crypto.subtle stores things in array buffers,     *
@@ -95,7 +94,8 @@ const App = () => {
   };
   useEffect(() => {
     if (password === '') return;
-    if (library === currentLibrary) return;
+    if (library === currentLibrary) return;  /// <--- this is why i can't get it to add diff passwords
+    //? store the message content in a set of objects by ID?
     const request = new Request(`http://localhost:1337/query/${library}`);
     if (getEntries === true) { // prevents useEffect running twice
       setNumEntries(0);
@@ -104,23 +104,25 @@ const App = () => {
       fetch(request)
         .then((response) => {
           if (response.status === 200) {
-            console.log('here 103');
+           // console.log(response.json());
             return response.json();
           }
           throw new Error('Something went wrong on api server!');
         })
         .then((response) => {
           for (let i = 0; i < response.length; i += 1) {
-            const entry = response[i];
+            const entry = response[i];                    // this is raw row recieved from the database
+            const rowID = entry._id
             try {
               (async () => {
-                const [t, b, f] = await decrypt(password,
+                const [t, b, f] = await decrypt(password, // title, body, fail
                   new Uint8Array(entry.salt),
                   new Uint8Array(entry.iv),
                   stringToArrayBuffer(entry.title),
-                  stringToArrayBuffer(entry.body));
+                  stringToArrayBuffer(entry.body)
+                );
                 if (f === 0) {
-                  setMessages((m) => [...m, [t, b]]);
+                  setMessages((m) => [...m, [t, b, rowID]]);
                   setNumEntries((num) => (num + 1));
                   setQueried(true);
                   setCurrentLibrary(library);
@@ -220,8 +222,9 @@ const App = () => {
       && queried === true && <p>there doesn&#39;t seem to be any notes in that Library!</p>}
       {numEntries === 0 && failedDecrypts === 0 && <p>Enter a Library!</p>}
       {messages.map((tuple, i) => {
-        const titleID = `title${i}`;
-        const bodyID = `body${i}`;
+        const titleID = `title${tuple[2]}`;
+        const bodyID = `body${tuple[2]}`;
+        const deleteID = `delete${tuple[2]}`
         return (
           <>
             <p className="messageTitle"
@@ -234,10 +237,13 @@ const App = () => {
               id={bodyID}
             >
               {tuple[1]}</p>
-            {messages.length !== i
-            && <div className="msgDivider"> </div>}
+            {messages.length !== i &&
+              <div className="msgDivider"> </div>
+            }
+            <DeleteButton rowId={tuple[2]} />
           </>
-      ))}
+        );
+      })}
     </form>
   );
 };

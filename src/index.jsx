@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import regeneratorRuntime from 'regenerator-runtime';
 import React from 'react';
 import ReactDOM from 'react-dom';

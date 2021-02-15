@@ -1,33 +1,86 @@
 Arguments: 
-  /usr/local/Cellar/node@12/12.16.3/bin/node /usr/local/Cellar/yarn/1.22.4/libexec/bin/yarn.js init
+  /usr/local/bin/node /usr/local/Cellar/yarn/1.22.4/libexec/bin/yarn.js install
 
 PATH: 
-  /usr/local/opt/mysql@5.7/bin:/usr/local/opt/mysql@5.7/bin:/usr/local/opt/node@12/bin:/usr/local/opt/node@12/bin:/usr/local/opt/node@12/bin:/Users/jessebeard/.rvm/gems/ruby-2.6.3/bin:/Users/jessebeard/.rvm/gems/ruby-2.6.3@global/bin:/Users/jessebeard/.rvm/rubies/ruby-2.6.3/bin:/Users/jessebeard/anaconda3/bin:/Library/Frameworks/Python.framework/Versions/3.6/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Applications/Server.app/Contents/ServerRoot/usr/bin:/Applications/Server.app/Contents/ServerRoot/usr/sbin:/Users/jessebeard/.rvm/bin
+  /Users/jessebeard/Downloads/:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Applications/Server.app/Contents/ServerRoot/usr/bin:/Applications/Server.app/Contents/ServerRoot/usr/sbin
 
 Yarn version: 
   1.22.4
 
 Node version: 
-  12.16.3
+  12.16.2
 
 Platform: 
   darwin x64
 
 Trace: 
-  Error: canceled
-      at Interface.<anonymous> (/usr/local/Cellar/yarn/1.22.4/libexec/lib/cli.js:137008:13)
-      at Interface.emit (events.js:310:20)
-      at Interface._ttyWrite (readline.js:893:16)
-      at ReadStream.onkeypress (readline.js:198:10)
-      at ReadStream.emit (events.js:310:20)
-      at emitKeys (internal/readline/utils.js:438:14)
-      at emitKeys.next (<anonymous>)
-      at ReadStream.onData (readline.js:1160:36)
-      at ReadStream.emit (events.js:310:20)
-      at addChunk (_stream_readable.js:286:12)
+  Error: https://registry.yarnpkg.com/chockidar: Not found
+      at Request.params.callback [as _callback] (/usr/local/Cellar/yarn/1.22.4/libexec/lib/cli.js:66987:18)
+      at Request.self.callback (/usr/local/Cellar/yarn/1.22.4/libexec/lib/cli.js:140748:22)
+      at Request.emit (events.js:310:20)
+      at Request.<anonymous> (/usr/local/Cellar/yarn/1.22.4/libexec/lib/cli.js:141720:10)
+      at Request.emit (events.js:310:20)
+      at IncomingMessage.<anonymous> (/usr/local/Cellar/yarn/1.22.4/libexec/lib/cli.js:141642:12)
+      at Object.onceWrapper (events.js:416:28)
+      at IncomingMessage.emit (events.js:322:22)
+      at endReadableNT (_stream_readable.js:1187:12)
+      at processTicksAndRejections (internal/process/task_queues.js:84:21)
 
 npm manifest: 
-  No manifest
+  {
+    "name": "crypto-notes",
+    "version": "1.0.0",
+    "description": "a simple notes app with basic encryption",
+    "main": "src/index.jsx",
+    "keywords": [],
+    "author": "Jesse Beard",
+    "license": "MIT",
+    "scripts": {
+      "clean": "rm dist/bundle.js",
+      "build-dev": "webpack -d --mode development --watch",
+      "build-prod": "webpack -p --mode production",
+      "server:start": "nodemon ./server/index.js --ignore dist/ --ignore src/",
+      "start": "webpack-dev-server --hot --mode development"
+    },
+    "dependencies": {
+      "@babel/plugin-transform-runtime": "^7.10.1",
+      "@babel/runtime": "^7.10.2",
+      "core-js": "3.6.5",
+      "dotenv": "^8.2.0",
+      "express": "^4.17.1",
+      "moment": "^2.29.1",
+      "mongoose": "^5.9.18",
+      "react": "^17.0.1",
+      "react-dom": "^17.0.1",
+      "regenerator-runtime": "^0.13.5"
+    },
+    "devDependencies": {
+      "@babel/core": "^7.12.16",
+      "@babel/preset-env": "^7.10.2",
+      "@babel/preset-react": "^7.12.13",
+      "@hot-loader/react-dom": "^17.0.1",
+      "babel-loader": "^8.1.0",
+      "css-loader": "^3.5.3",
+      "eslint": "^7.20.0",
+      "eslint-plugin-import": "^2.20.1",
+      "eslint-plugin-jsx-a11y": "^6.2.3",
+      "eslint-plugin-react-hooks": "^4.0.4",
+      "eslint-plugin-react": "^7.22.0",
+      "eslint-webpack-plugin": "^2.5.1",
+      "nodemon": "^2.0.4",
+      "react-hot-loader": "^4.13.0",
+      "style-loader": "^1.2.1",
+      "webpack": "^4.43.0",
+      "webpack-cli": "^3.3.11",
+      "webpack-dev-server": "^3.11.2"
+    },
+    "resolutions":{
+      "webpack/**/chokidar": "^3.0",
+      "webpack-dev-server/chockidar": "^3.0"
+    },
+    "repository": "https://github.com/jessebeard/crypto_notes.git",
+    "private": false
+  }
 
 yarn manifest: 
   No manifest

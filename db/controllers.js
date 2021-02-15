@@ -36,8 +36,8 @@ exports.updateDoc = (itemId, updateKey, updateValue, callback) => {
     });
 };
 
-exports.deleteDoc = (itemId, callback) => {
-  entry.findOneAndDelete({ id: itemId }, (err, item) => {
+exports.deleteEntry = (itemId, callback) => {
+  entry.findOneAndDelete({ _id: itemId }, (err, item) => {
     if (err) {
       callback(err, null);
     } else {
