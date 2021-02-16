@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 
-const DeleteButton = ({rowId}) => {
+const DeleteButton = ({rowId, action}) => {
   const [toDelete, setToDelete] = useState(false);
+  const [isDeleted, setIsDeleted] = useState(false);
   const handleDelete = (event) => {
-    event.preventDefault();
     setToDelete(true);
   };
   useEffect(() => {
@@ -12,10 +12,12 @@ const DeleteButton = ({rowId}) => {
       fetch(request)
         .then((response) => {
           if (response.status === 200) {
-            console.log(response.json());
+            action(rowId)
+            setIsDeleted(true)
             //return response.json();
+          } else {
+            throw new Error('Something went wrong on api server!');
           }
-          throw new Error('Something went wrong on api server!');
         })
         .catch((error) => console.log('error in deleteButton', error));
       setToDelete(false);
@@ -27,10 +29,14 @@ const DeleteButton = ({rowId}) => {
 
 
   return (
-    <button
-      onClick={handleDelete}>
-    </button>
-  )
-};
+    <>
+      <button
+        type="button"
+        onClick={handleDelete}
+      >
+        x
+      </button>
+    </>
+  )};
 
 export default DeleteButton;

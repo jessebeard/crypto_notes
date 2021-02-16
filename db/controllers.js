@@ -19,6 +19,8 @@ exports.getEntries = (library, callback) => {
     if (err) {
       callback(err, null);
     } else {
+      // eslint-disable-next-line no-underscore-dangle
+      docs.forEach((doc) => delete Object.assign(doc, { id: doc._id }));
       callback(null, docs);
     }
   });

@@ -6,7 +6,7 @@ import React, { useState, useEffect } from 'react';
 import useInput from './utilities/useInput';
 import encrypt from './encryption/encrypt';
 import decrypt from './encryption/decrypt';
-import DeleteButton from './artifacts/DeleteButton'
+import DeleteButton from './artifacts/DeleteButton';
 /* **************************************************** *
  *                HELPER FUNCTIONS                      *
  * JS crypto.subtle stores things in array buffers,     *
@@ -25,7 +25,6 @@ function stringToArrayBuffer(str) {
   return buf;
 }
 
-
 /* **************************************************** *
  *                  MAIN FUNCTION                       *
  * **************************************************** */
@@ -40,6 +39,11 @@ const App = () => {
   const [currentLibrary, setCurrentLibrary] = useState('');
   const [submit, setSubmit] = useState(false);
   const [queried, setQueried] = useState(false);
+
+  /* *********************************************************
+   *               Encrypt & add                             *
+   ********************************************************* */
+
   const handleSubmit = (event) => {
     event.preventDefault();
     setSubmit(true);
@@ -70,21 +74,28 @@ const App = () => {
       fetch(request)
         .then((response) => {
           if (response.status === 201) {
-            if (currentLibrary === library) {
-              setMessages((m) => [...m, [title, body]]);
-              setNumEntries((num) => (num + 1));
-            }
-          } else {
-            throw new Error('Something went wrong on api server!');
+            return response.json();
+          }
+          throw new Error('Something went wrong on api server!');
+        })
+        .then((response) => {
+          const { id } = response;
+          if (currentLibrary === '') setCurrentLibrary(library);
+          if (currentLibrary === library) {
+            setMessages((m) => [...m, { title, body, id }]);
+            setNumEntries((num) => (num + 1));
           }
         }).catch((error) => {
           alert(error);
-          console.error(error);
         });
     })();
     setSubmit(false);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [submit]);
+
+  /* **************************************************************
+  *                      Get & Decrypt                           *
+  ************************************************************** */
 
   const [failedDecrypts, setFailedDecrypts] = useState(0);
   const [getEntries, setGetEntries] = useState(false);
@@ -94,8 +105,8 @@ const App = () => {
   };
   useEffect(() => {
     if (password === '') return;
-    if (library === currentLibrary) return;  /// <--- this is why i can't get it to add diff passwords
-    //? store the message content in a set of objects by ID?
+    if (library === currentLibrary) return; // <--- this is why i can't get it to add diff passwords
+    // ? store the message content in a set of objects by ID?
     const request = new Request(`http://localhost:1337/query/${library}`);
     if (getEntries === true) { // prevents useEffect running twice
       setNumEntries(0);
@@ -104,25 +115,25 @@ const App = () => {
       fetch(request)
         .then((response) => {
           if (response.status === 200) {
-           // console.log(response.json());
             return response.json();
           }
-          throw new Error('Something went wrong on api server!');
         })
         .then((response) => {
           for (let i = 0; i < response.length; i += 1) {
-            const entry = response[i];                    // this is raw row recieved from the database
-            const rowID = entry._id
+            const entry = response[i]; // this is raw row recieved from the database
+            const rowId = entry.id;
             try {
               (async () => {
-                const [t, b, f] = await decrypt(password, // title, body, fail
+                const [t, b, f] = await decrypt( // title, body, fail
+                  password,
                   new Uint8Array(entry.salt),
                   new Uint8Array(entry.iv),
                   stringToArrayBuffer(entry.title),
                   stringToArrayBuffer(entry.body)
                 );
                 if (f === 0) {
-                  setMessages((m) => [...m, [t, b, rowID]]);
+                  setMessages((m) => [...m,
+                    { title: t, body: b, id: rowId }]);
                   setNumEntries((num) => (num + 1));
                   setQueried(true);
                   setCurrentLibrary(library);
@@ -139,10 +150,32 @@ const App = () => {
     }
     // eslint-disable-next-line consistent-return
     return () => { setGetEntries(false); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [getEntries]);
 
-
+  /* *******************************************************************
+  *                       Remove Deletion                             *
+  ******************************************************************* */
+  // const [deleted, setDeleted] = useState(false);
+  const messageSet = new Set();
+  messages.forEach((m) => messageSet.add(m));
+  const deleteMessage = (m) => {
+    messageSet.forEach((entry) => {
+      if (entry.id === m) {
+        messageSet.delete(entry);
+        setMessages(Array.from(messageSet));
+      }
+    });
+    // setDeleted(true);
+  };
+  // useEffect(() => {
+  //   console.log('here 172', messageSet)
+  //   if (deleted === true) {
+  //     setMessages(Array.from(messageSet))
+  //     console.log('177', messageSet, messages)
+  // }
+  //   return () => { setDeleted(false); };
+  // }, [deleted, messages]);
   /* **************************************************** *
    *                   RENDER JSX                         *
    * **************************************************** */
@@ -221,26 +254,26 @@ const App = () => {
       {numEntries === 0 && failedDecrypts === 0
       && queried === true && <p>there doesn&#39;t seem to be any notes in that Library!</p>}
       {numEntries === 0 && failedDecrypts === 0 && <p>Enter a Library!</p>}
-      {messages.map((tuple, i) => {
-        const titleID = `title${tuple[2]}`;
-        const bodyID = `body${tuple[2]}`;
-        const deleteID = `delete${tuple[2]}`
+      {Array.from(messageSet).map((obj, i) => {
+        const titleID = `title${obj.id}`;
+        const bodyID = `body${obj.id}`;
+        const deleteID = `delete${obj.id}`
         return (
           <>
             <p className="messageTitle"
               key={titleID}
               id={titleID}
             >
-              {tuple[0]}</p>
+              {obj.title}</p>
             <p className="messageBody"
               key={bodyID}
               id={bodyID}
             >
-              {tuple[1]}</p>
-            {messages.length !== i &&
+              {obj.body}</p>
+            {messages.length !== i - 1  &&
               <div className="msgDivider"> </div>
             }
-            <DeleteButton rowId={tuple[2]} />
+            <DeleteButton rowId={obj.id} action={deleteMessage} />
           </>
         );
       })}

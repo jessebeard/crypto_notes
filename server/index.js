@@ -28,13 +28,13 @@ app.get('/query/:id', (req, res) => {
 
 app.post('/submit/', (req, res) => {
   console.log('inpost', req.body);
-  saveEntry(req.body, (err) => {
+  saveEntry(req.body, (err, row) => {
     if (err) {
       console.log(`error saving: ${err}`);
       res.sendStatus(400);
     } else {
-      console.log('saved id: ', req.body.id);
-      res.sendStatus(201);
+      console.log('saved id: ', row._id);
+      res.status(201).json(row);
     }
   });
 });
