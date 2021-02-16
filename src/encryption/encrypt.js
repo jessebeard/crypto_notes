@@ -1,5 +1,4 @@
-import regeneratorRuntime from 'regenerator-runtime';
-import React, { useState, useEffect } from 'react';
+// import React, { useState, useEffect } from 'react';
 import 'core-js';
 import { getKeyMaterial, getKey, encodeMessage } from './crypt';
 

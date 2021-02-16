@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-import regeneratorRuntime from 'regenerator-runtime';
 import { getKeyMaterial, getKey, decodeMessage } from './crypt';
 /*
     Derive a key from a password supplied by the user, and use the key

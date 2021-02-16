@@ -1,7 +1,6 @@
-import regeneratorRuntime from 'regenerator-runtime';
-  /*
-  Store the calculated ciphertext and IV here, so we can decrypt the message later.
-  */
+/*
+Store the calculated ciphertext and IV here, so we can decrypt the message later.
+*/
 // let ciphertext;
 // let iv; //should be stored in the db, not secret ,stands for Initialization Vector
 
@@ -52,7 +51,6 @@ function getKey(cryptoKey, salt) {
     ['encrypt', 'decrypt'],
   );
 }
-
 
 export {
   getKeyMaterial, getKey, encodeMessage, decodeMessage,
