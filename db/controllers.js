@@ -8,11 +8,12 @@ exports.saveEntry = (note, callback) => {
       callback(err, null);
     } else {
       console.log('saved entry');
+      // eslint-disable-next-line no-underscore-dangle
+      delete Object.assign(success, { id: success._id });
       callback(null, success);
     }
   });
 };
-
 
 exports.getEntries = (library, callback) => {
   entry.find({ library }, (err, docs) => {

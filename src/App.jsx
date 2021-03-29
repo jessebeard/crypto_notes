@@ -35,7 +35,9 @@ const App = () => {
   const [title, setTitle] = useInput('');
   const [body, setBody] = useInput('');
   const [messages, setMessages] = useState([]);
-  const [numEntries, setNumEntries] = useState(0);
+  const [numDecrypted, setNumDecrypted] = useState(0);
+  const [numEncrypted, setNumEncrypted] = useState(0);
+  const [numDeleted, setNumDeleted] = useState(0);
   const [currentLibrary, setCurrentLibrary] = useState('');
   const [submit, setSubmit] = useState(false);
   const [queried, setQueried] = useState(false);
@@ -74,16 +76,21 @@ const App = () => {
       fetch(request)
         .then((response) => {
           if (response.status === 201) {
+            if (currentLibrary.length === 0) setCurrentLibrary(library);
             return response.json();
           }
           throw new Error('Something went wrong on api server!');
         })
         .then((response) => {
           const { id } = response;
-          if (currentLibrary === '') setCurrentLibrary(library);
+          console.log(response, id, 84, currentLibrary, library);
           if (currentLibrary === library) {
             setMessages((m) => [...m, { title, body, id }]);
-            setNumEntries((num) => (num + 1));
+            setNumEncrypted((num) => (num + 1));
+          }
+          if (currentLibrary === '') {
+            setMessages([{ title, body, id }]);
+            setNumEncrypted(1);
           }
         }).catch((error) => {
           alert(error);
@@ -109,9 +116,7 @@ const App = () => {
     // ? store the message content in a set of objects by ID?
     const request = new Request(`http://localhost:1337/query/${library}`);
     if (getEntries === true) { // prevents useEffect running twice
-      setNumEntries(0);
       setMessages([]);
-      setFailedDecrypts(0);
       fetch(request)
         .then((response) => {
           if (response.status === 200) {
@@ -119,30 +124,36 @@ const App = () => {
           }
         })
         .then((response) => {
-          for (let i = 0; i < response.length; i += 1) {
-            const entry = response[i]; // this is raw row recieved from the database
-            const rowId = entry.id;
-            try {
-              (async () => {
-                const [t, b, f] = await decrypt( // title, body, fail
-                  password,
-                  new Uint8Array(entry.salt),
-                  new Uint8Array(entry.iv),
-                  stringToArrayBuffer(entry.title),
-                  stringToArrayBuffer(entry.body)
-                );
-                if (f === 0) {
-                  setMessages((m) => [...m,
-                    { title: t, body: b, id: rowId }]);
-                  setNumEntries((num) => (num + 1));
-                  setQueried(true);
-                  setCurrentLibrary(library);
-                } else {
-                  setFailedDecrypts((num) => num + 1);
-                }
-              })();
-            } catch {
-              setFailedDecrypts((num) => num + 1);
+          if (response.length === 0) {
+            setQueried(true);
+            setFailedDecrypts(0);
+            setNumDecrypted(0);
+          } else {
+            for (let i = 0; i < response.length; i += 1) {
+              const entry = response[i]; // this is raw row recieved from the database
+              const rowId = entry.id;
+              try {
+                (async () => {
+                  const [t, b, f] = await decrypt( // title, body, fail
+                    password,
+                    new Uint8Array(entry.salt),
+                    new Uint8Array(entry.iv),
+                    stringToArrayBuffer(entry.title),
+                    stringToArrayBuffer(entry.body)
+                  );
+                  if (f === 0) {
+                    setMessages((m) => [...m,
+                      { title: t, body: b, id: rowId }]);
+                    setNumDecrypted((num) => (num + 1));
+                    setQueried(true);
+                    setCurrentLibrary(library);
+                  } else {
+                    setFailedDecrypts((num) => num + 1);
+                  }
+                })();
+              } catch {
+                setFailedDecrypts((num) => num + 1);
+              }
             }
           }
         }).catch((error) => console.log('error line 123', error));
@@ -164,6 +175,7 @@ const App = () => {
       if (entry.id === m) {
         messageSet.delete(entry);
         setMessages(Array.from(messageSet));
+        setNumDeleted((num) => (num + 1));
       }
     });
     // setDeleted(true);
@@ -247,39 +259,43 @@ const App = () => {
       >
         Get Notes and Decrypt
       </button>
-      {numEntries > 0 && <p>{`decrypted ${numEntries} entries`}</p>}
-      {failedDecrypts > 0 && <p>{`failed entries ${failedDecrypts}`}</p>}
-      {numEntries === 0 && failedDecrypts > 0
+      {numDecrypted === 0 && failedDecrypts === 0
+        && numEncrypted === 0 && <p>Enter a Library!</p>}
+      {numDecrypted > 0 && <p>{`decrypted ${numDecrypted} entries`}</p>}
+      {failedDecrypts > 0 && <p>{`failed entries ${failedDecrypts} on the last run!`}</p>}
+      {numDecrypted === 0 && failedDecrypts > 0
        && <p>try another password</p>}
-      {numEntries === 0 && failedDecrypts === 0
-      && queried === true && <p>there doesn&#39;t seem to be any notes in that Library!</p>}
-      {numEntries === 0 && failedDecrypts === 0 && <p>Enter a Library!</p>}
+      {numDecrypted === 0 && failedDecrypts === 0 && numEncrypted === 0
+      && queried === true && <p>There doesn&#39;t seem to be any notes in that Library!</p>}
+      { numEncrypted > 0 && <p>{`encrypted and added ${numEncrypted}`}</p> }
+      { numDeleted > 0 && <p>{`deleted ${numDeleted} entries`}</p> }
       {Array.from(messageSet).map((obj, i) => {
-        const titleID = `title${obj.id}`;
-        const bodyID = `body${obj.id}`;
-        const deleteID = `delete${obj.id}`
+        const titleId = `title${obj.id}`;
+        const bodyId = `body${obj.id}`;
+        const deleteId = `delete${obj.id}`;
         return (
           <>
-            <p className="messageTitle"
-              key={titleID}
-              id={titleID}
+            <p
+              className="messageTitle"
+              key={titleId}
+              id={titleId}
             >
-              {obj.title}</p>
-            <p className="messageBody"
-              key={bodyID}
-              id={bodyID}
+              {obj.title}
+            </p>
+            <p
+              className="messageBody"
+              key={bodyId}
+              id={bodyId}
             >
-              {obj.body}</p>
-            {messages.length !== i - 1  &&
-              <div className="msgDivider"> </div>
-            }
-            <DeleteButton rowId={obj.id} action={deleteMessage} />
+              {obj.body}
+            </p>
+            <DeleteButton rowId={obj.id} action={deleteMessage} key={deleteId} />
+            {messages.length !== i - 1 && <div className="msgDivider"> </div>}
           </>
         );
       })}
     </form>
   );
 };
-
 
 export default App;

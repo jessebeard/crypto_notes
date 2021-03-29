@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 
 const DeleteButton = ({rowId, action}) => {
   const [toDelete, setToDelete] = useState(false);
-  const [isDeleted, setIsDeleted] = useState(false);
-  const handleDelete = (event) => {
+
+
+  const handleDelete = () => {
     setToDelete(true);
   };
   useEffect(() => {
@@ -12,10 +13,9 @@ const DeleteButton = ({rowId, action}) => {
       fetch(request)
         .then((response) => {
           if (response.status === 200) {
-            action(rowId)
-            setIsDeleted(true)
+            action(rowId);
             //return response.json();
-          } else {
+          } else if (response.status === 500 ) {
             throw new Error('Something went wrong on api server!');
           }
         })
@@ -27,7 +27,6 @@ const DeleteButton = ({rowId, action}) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [toDelete]);
 
-
   return (
     <>
       <button
@@ -37,6 +36,7 @@ const DeleteButton = ({rowId, action}) => {
         x
       </button>
     </>
-  )};
+  );
+};
 
 export default DeleteButton;
