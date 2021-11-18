@@ -7,21 +7,17 @@ const app = express();
 const PORT = 1337;
 const log = console.log.bind(console);
 
-const watcher = watch('file, dir, glob, or array', {
+const nodePaths = ['./server/index.js', './db/']
+const watcher = watch(nodePaths, {
   ignored: /(^|[\/\\])\../, // ignore dotfiles
   persistent: true,
 });
-
-// Something to use when events are received.
 
 // Add event listeners.
 watcher
   .on('add', (listenerPath) => log(`File ${listenerPath} has been added`))
   .on('change', (listenerPath) => log(`File ${listenerPath} has been changed`))
   .on('unlink', (listenerPath) => log(`File ${listenerPath} has been removed`));
-
-
-
 
 app.use('/', express.static('./dist'));
 
@@ -30,6 +26,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.get('/query/:id', (req, res) => {
+  res.set('Access-Control-Allow-Origin');
   const library = req.params.id;
   log('inget', library);
   getEntries(library, (err, docs) => {
@@ -43,6 +40,7 @@ app.get('/query/:id', (req, res) => {
 });
 
 app.post('/submit/', (req, res) => {
+  res.set('Access-Control-Allow-Origin');
   log('inpost', req.body);
   saveEntry(req.body, (err, row) => {
     if (err) {
@@ -67,5 +65,4 @@ app.delete('/delete/:id', (req, res) => {
   });
 });
 
-// eslint-disable-next-line no-console
 app.listen(PORT, () => log(`listening at http://localhost:${PORT}`));
