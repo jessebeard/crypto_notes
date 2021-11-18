@@ -1,11 +1,11 @@
 Arguments: 
-  /usr/local/bin/node /usr/local/Cellar/yarn/1.22.4/libexec/bin/yarn.js install
+  /usr/local/bin/node /usr/local/Cellar/yarn/1.22.17/libexec/bin/yarn.js install
 
 PATH: 
   /Users/jessebeard/Downloads/:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Applications/Server.app/Contents/ServerRoot/usr/bin:/Applications/Server.app/Contents/ServerRoot/usr/sbin
 
 Yarn version: 
-  1.22.4
+  1.22.17
 
 Node version: 
   12.16.2
@@ -14,13 +14,13 @@ Platform:
   darwin x64
 
 Trace: 
-  Error: https://registry.yarnpkg.com/chockidar: Not found
-      at Request.params.callback [as _callback] (/usr/local/Cellar/yarn/1.22.4/libexec/lib/cli.js:66987:18)
-      at Request.self.callback (/usr/local/Cellar/yarn/1.22.4/libexec/lib/cli.js:140748:22)
+  Error: https://registry.yarnpkg.com/typscript: Not found
+      at Request.params.callback [as _callback] (/usr/local/Cellar/yarn/1.22.17/libexec/lib/cli.js:67029:18)
+      at Request.self.callback (/usr/local/Cellar/yarn/1.22.17/libexec/lib/cli.js:140883:22)
       at Request.emit (events.js:310:20)
-      at Request.<anonymous> (/usr/local/Cellar/yarn/1.22.4/libexec/lib/cli.js:141720:10)
+      at Request.<anonymous> (/usr/local/Cellar/yarn/1.22.17/libexec/lib/cli.js:141855:10)
       at Request.emit (events.js:310:20)
-      at IncomingMessage.<anonymous> (/usr/local/Cellar/yarn/1.22.4/libexec/lib/cli.js:141642:12)
+      at IncomingMessage.<anonymous> (/usr/local/Cellar/yarn/1.22.17/libexec/lib/cli.js:141777:12)
       at Object.onceWrapper (events.js:416:28)
       at IncomingMessage.emit (events.js:322:22)
       at endReadableNT (_stream_readable.js:1187:12)
@@ -45,6 +45,9 @@ npm manifest:
     "dependencies": {
       "@babel/plugin-transform-runtime": "^7.10.1",
       "@babel/runtime": "^7.10.2",
+      "@openid/appauth": "^1.1.1",
+      "@types/react": "^16.7.1",
+      "@types/react-dom": "^16.0.9",
       "core-js": "3.6.5",
       "dotenv": "^8.2.0",
       "express": "^4.17.1",
@@ -62,6 +65,7 @@ npm manifest:
       "babel-loader": "^8.1.0",
       "css-loader": "^3.5.3",
       "eslint": "^7.20.0",
+      "eslint-config-airbnb": "^18.2.1",
       "eslint-plugin-import": "^2.20.1",
       "eslint-plugin-jsx-a11y": "^6.2.3",
       "eslint-plugin-react-hooks": "^4.0.4",
@@ -70,13 +74,14 @@ npm manifest:
       "nodemon": "^2.0.4",
       "react-hot-loader": "^4.13.0",
       "style-loader": "^1.2.1",
+      "typscript": "^3.1.6",
       "webpack": "^4.43.0",
       "webpack-cli": "^3.3.11",
       "webpack-dev-server": "^3.11.2"
     },
     "resolutions":{
       "webpack/**/chokidar": "^3.0",
-      "webpack-dev-server/chockidar": "^3.0"
+      "webpack-dev-server/chokidar": "^3.0"
     },
     "repository": "https://github.com/jessebeard/crypto_notes.git",
     "private": false
