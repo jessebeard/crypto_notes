@@ -7,7 +7,7 @@ const app = express();
 const PORT = 1337;
 const log = console.log.bind(console);
 
-const nodePaths = ['./server/index.js', './db/']
+const nodePaths = ['./server/index.js', './db/'];
 const watcher = watch(nodePaths, {
   ignored: /(^|[\/\\])\../, // ignore dotfiles
   persistent: true,
