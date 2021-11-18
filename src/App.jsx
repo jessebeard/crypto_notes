@@ -73,28 +73,22 @@ const App = () => {
         }),
       };
       const request = new Request('http://localhost:1337/submit/', myInit);
-      fetch(request)
-        .then((response) => {
-          if (response.status === 201) {
-            if (currentLibrary.length === 0) setCurrentLibrary(library);
-            return response.json();
-          }
-          throw new Error('Something went wrong on api server!');
-        })
-        .then((response) => {
-          const { id } = response;
-          console.log(response, id, 84, currentLibrary, library);
-          if (currentLibrary === library) {
-            setMessages((m) => [...m, { title, body, id }]);
-            setNumEncrypted((num) => (num + 1));
-          }
-          if (currentLibrary === '') {
-            setMessages([{ title, body, id }]);
-            setNumEncrypted(1);
-          }
-        }).catch((error) => {
-          alert(error);
-        });
+      const response = await fetch(request);
+      if (response.status === 201) {
+        if (currentLibrary.length === 0) setCurrentLibrary(library);
+        return;
+      }
+      const responseJSON = await response.json();
+      const { id } = responseJSON;
+      console.log(responseJSON, id, 83, currentLibrary, library);
+      if (currentLibrary === library) {
+        setMessages((m) => [...m, { title, body, id }]);
+        setNumEncrypted((num) => (num + 1));
+      }
+      if (currentLibrary === '') {
+        setMessages([{ title, body, id }]);
+        setNumEncrypted(1);
+      }
     })();
     setSubmit(false);
   }, [submit]);
@@ -121,30 +115,33 @@ const App = () => {
       setNumDecrypted(0);
       return;
     }
+    const decryptingArray = [];
+    const rowIdArray = [];
     for (let i = 0; i < encryptedJSON.length; i += 1) {
       const entry = encryptedJSON[i]; // this is raw row recieved from the database
-      const rowId = entry.id;
-      try {
-        const [t, b, f] = await decrypt( // title, body, fail
-          password,
-          new Uint8Array(entry.salt),
-          new Uint8Array(entry.iv),
-          stringToArrayBuffer(entry.title),
-          stringToArrayBuffer(entry.body)
-        );
-        if (f === 0) {
-          setMessages((m) => [...m,
-            { title: t, body: b, id: rowId }]);
-          setNumDecrypted((num) => (num + 1));
-          setQueried(true);
-          setCurrentLibrary(library);
-        }
-        setFailedDecrypts((num) => num + 1);
-        return
-      } catch {
+      rowIdArray.push(entry.id);
+
+      decryptingArray.push(decrypt( // title, body, fail
+        password,
+        new Uint8Array(entry.salt),
+        new Uint8Array(entry.iv),
+        stringToArrayBuffer(entry.title),
+        stringToArrayBuffer(entry.body)
+      ));
+    }
+    const decryptedArray = await Promise.allSettled(decryptingArray);
+    decryptedArray.forEach(([t, b, f], i) => {
+      const rowId = rowIdArray[i];
+      if (f === 0) {
+        setMessages((m) => [...m,
+          { title: t, body: b, id: rowId }]);
+        setNumDecrypted((num) => (num + 1));
+        setQueried(true);
+        setCurrentLibrary(library);
+      } else {
         setFailedDecrypts((num) => num + 1);
       }
-    }
+    });
   }
   useEffect(() => {
     if (password === '') return;
