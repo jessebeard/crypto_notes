@@ -97,7 +97,6 @@ const App = () => {
         });
     })();
     setSubmit(false);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [submit]);
 
   /* **************************************************************
@@ -122,6 +121,7 @@ const App = () => {
           if (response.status === 200) {
             return response.json();
           }
+          throw new Error(`recieved code ${response.status}`);
         })
         .then((response) => {
           if (response.length === 0) {
@@ -161,7 +161,6 @@ const App = () => {
     }
     // eslint-disable-next-line consistent-return
     return () => { setGetEntries(false); };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [getEntries]);
 
   /* *******************************************************************
@@ -197,7 +196,9 @@ const App = () => {
       onSubmit={(e) => handleSubmit(e)}
       id="inputForm"
     >
-      <label>
+      <label
+        className="input-label"
+      >
         Library?
         <input
           required
@@ -209,19 +210,26 @@ const App = () => {
         />
       </label>
       <div className="divider" />
-      <label>
+      <label
+        className="input-label"
+        htmlFor="passwordInput"
+      >
         Password:
-        <input
-          required
-          type="text"
-          placeholder="don't forget this!"
-          value={password}
-          onChange={setPassword}
-          id="passwordInput"
-        />
       </label>
+      <br />
+      <input
+        required
+        type="password"
+        placeholder="don't forget this!"
+        value={password}
+        onChange={setPassword}
+        id="passwordInput"
+      />
+
       <div className="divider" />
-      <label>
+      <label
+        className="input-label"
+      >
         Title:
         <input
           required
@@ -234,16 +242,20 @@ const App = () => {
         />
       </label>
       <div className="divider" />
-      <label>
+      <label
+        display="block"
+        className="input-label"
+        htmlFor="bodyInput"
+      >
         Body
-        <textarea
-          required
-          type="text"
-          value={body}
-          onChange={setBody}
-          id="bodyInput"
-        />
       </label>
+      <textarea
+        required
+        type="text"
+        value={body}
+        onChange={setBody}
+        id="bodyInput"
+      />
       <div className="divider" />
       <div className="divider" />
       <button
