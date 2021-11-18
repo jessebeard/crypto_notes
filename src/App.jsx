@@ -109,6 +109,43 @@ const App = () => {
     event.preventDefault();
     setGetEntries(true);
   };
+  async function fetchMessages(request) {
+    const response = await fetch(request);
+    if (response.status !== 200) {
+      throw new Error(`recieved code ${response.status}`);
+    }
+    const encryptedJSON = await response.json();
+    if (encryptedJSON.length === 0) {
+      setQueried(true);
+      setFailedDecrypts(0);
+      setNumDecrypted(0);
+      return;
+    }
+    for (let i = 0; i < encryptedJSON.length; i += 1) {
+      const entry = encryptedJSON[i]; // this is raw row recieved from the database
+      const rowId = entry.id;
+      try {
+        const [t, b, f] = await decrypt( // title, body, fail
+          password,
+          new Uint8Array(entry.salt),
+          new Uint8Array(entry.iv),
+          stringToArrayBuffer(entry.title),
+          stringToArrayBuffer(entry.body)
+        );
+        if (f === 0) {
+          setMessages((m) => [...m,
+            { title: t, body: b, id: rowId }]);
+          setNumDecrypted((num) => (num + 1));
+          setQueried(true);
+          setCurrentLibrary(library);
+        }
+        setFailedDecrypts((num) => num + 1);
+        return
+      } catch {
+        setFailedDecrypts((num) => num + 1);
+      }
+    }
+  }
   useEffect(() => {
     if (password === '') return;
     if (library === currentLibrary) return; // <--- this is why i can't get it to add diff passwords
@@ -116,47 +153,8 @@ const App = () => {
     const request = new Request(`http://localhost:1337/query/${library}`);
     if (getEntries === true) { // prevents useEffect running twice
       setMessages([]);
-      fetch(request)
-        .then((response) => {
-          if (response.status === 200) {
-            return response.json();
-          }
-          throw new Error(`recieved code ${response.status}`);
-        })
-        .then((response) => {
-          if (response.length === 0) {
-            setQueried(true);
-            setFailedDecrypts(0);
-            setNumDecrypted(0);
-          } else {
-            for (let i = 0; i < response.length; i += 1) {
-              const entry = response[i]; // this is raw row recieved from the database
-              const rowId = entry.id;
-              try {
-                (async () => {
-                  const [t, b, f] = await decrypt( // title, body, fail
-                    password,
-                    new Uint8Array(entry.salt),
-                    new Uint8Array(entry.iv),
-                    stringToArrayBuffer(entry.title),
-                    stringToArrayBuffer(entry.body)
-                  );
-                  if (f === 0) {
-                    setMessages((m) => [...m,
-                      { title: t, body: b, id: rowId }]);
-                    setNumDecrypted((num) => (num + 1));
-                    setQueried(true);
-                    setCurrentLibrary(library);
-                  } else {
-                    setFailedDecrypts((num) => num + 1);
-                  }
-                })();
-              } catch {
-                setFailedDecrypts((num) => num + 1);
-              }
-            }
-          }
-        }).catch((error) => console.log('error line 123', error));
+      fetchMessages(request)
+        .catch((error) => console.log('error line 123', error));
       setGetEntries(false);
     }
     // eslint-disable-next-line consistent-return
