@@ -1,4 +1,4 @@
-import regeneratorRuntime from 'regenerator-runtime';
+
 import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
