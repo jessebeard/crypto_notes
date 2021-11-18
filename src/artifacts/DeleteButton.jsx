@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 const DeleteButton = ({rowId, action}) => {
   const [toDelete, setToDelete] = useState(false);
 
-
   const handleDelete = () => {
     setToDelete(true);
   };
