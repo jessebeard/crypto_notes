@@ -119,6 +119,7 @@ const App = () => {
     const rowIdArray = [];
     for (let i = 0; i < encryptedJSON.length; i += 1) {
       const entry = encryptedJSON[i]; // this is raw row recieved from the database
+      console.log(entry);
       rowIdArray.push(entry.id);
 
       decryptingArray.push(decrypt( // title, body, fail
@@ -129,7 +130,8 @@ const App = () => {
         stringToArrayBuffer(entry.body)
       ));
     }
-    const decryptedArray = await Promise.allSettled(decryptingArray);
+    let decryptedArray = await Promise.allSettled(decryptingArray);
+    decryptedArray = decryptedArray.map((entry) => entry.value);
     decryptedArray.forEach(([t, b, f], i) => {
       const rowId = rowIdArray[i];
       if (f === 0) {
@@ -144,18 +146,20 @@ const App = () => {
     });
   }
   useEffect(() => {
-    if (password === '') return;
-    if (library === currentLibrary) return; // <--- this is why i can't get it to add diff passwords
-    // ? store the message content in a set of objects by ID?
+    if (password === '') {
+      return;
+    }
+    if (library !== currentLibrary) {
+      setFailedDecrypts(0);
+      setMessages([]);
+    }
     const request = new Request(`http://localhost:1337/query/${library}`);
     if (getEntries === true) { // prevents useEffect running twice
-      setMessages([]);
       fetchMessages(request)
         .catch((error) => console.log('error line 123', error));
       setGetEntries(false);
     }
-    // eslint-disable-next-line consistent-return
-    return () => { setGetEntries(false); };
+    setGetEntries(false);
   }, [getEntries]);
 
   /* *******************************************************************
@@ -194,16 +198,20 @@ const App = () => {
       <label
         className="input-label"
       >
-        Library?
-        <input
-          required
-          type="text"
-          placeholder="e.g. Diary"
-          value={library}
-          onChange={setLibrary}
-          id="libraryInput"
-        />
+        Library:
       </label>
+      <br
+        className="label-break"
+      />
+
+      <input
+        required
+        type="text"
+        placeholder="e.g. Diary"
+        value={library}
+        onChange={setLibrary}
+        id="libraryInput"
+      />
       <div className="divider" />
       <label
         className="input-label"
@@ -211,7 +219,9 @@ const App = () => {
       >
         Password:
       </label>
-      <br />
+      <br
+        className="label-break"
+      />
       <input
         required
         type="password"
@@ -226,16 +236,19 @@ const App = () => {
         className="input-label"
       >
         Title:
-        <input
-          required
-          name="title"
-          type="text"
-          placeholder="entries are displayed chronologically"
-          value={title}
-          onChange={setTitle}
-          id="titleInput"
-        />
       </label>
+      <br
+        className="label-break"
+      />
+      <input
+        required
+        name="title"
+        type="text"
+        placeholder="entries are displayed chronologically"
+        value={title}
+        onChange={setTitle}
+        id="titleInput"
+      />
       <div className="divider" />
       <label
         display="block"
@@ -244,6 +257,9 @@ const App = () => {
       >
         Body
       </label>
+      <br
+        className="label-break"
+      />
       <textarea
         required
         type="text"
@@ -266,16 +282,22 @@ const App = () => {
       >
         Get Notes and Decrypt
       </button>
-      {numDecrypted === 0 && failedDecrypts === 0
-        && numEncrypted === 0 && <p>Enter a Library!</p>}
-      {numDecrypted > 0 && <p>{`decrypted ${numDecrypted} entries`}</p>}
-      {failedDecrypts > 0 && <p>{`failed entries ${failedDecrypts} on the last run!`}</p>}
-      {numDecrypted === 0 && failedDecrypts > 0
-       && <p>try another password</p>}
-      {numDecrypted === 0 && failedDecrypts === 0 && numEncrypted === 0
-      && queried === true && <p>There doesn&#39;t seem to be any notes in that Library!</p>}
+      { numDecrypted === 0 && failedDecrypts === 0
+        && numEncrypted === 0 && <p>Enter a Library!</p> }
+
+      { numDecrypted > 0 && <p>{`decrypted ${numDecrypted} entries`}</p> }
+
+      { failedDecrypts > 0 && <p>{`failed entries ${failedDecrypts} on the last run!`}</p> }
+
+      { numDecrypted === 0 && failedDecrypts > 0 && <p>try another password</p> }
+
+      { numDecrypted === 0 && failedDecrypts === 0 && numEncrypted === 0
+      && queried === true && <p>There doesn&#39;t seem to be any notes in that Library!</p> }
+
       { numEncrypted > 0 && <p>{`encrypted and added ${numEncrypted}`}</p> }
+
       { numDeleted > 0 && <p>{`deleted ${numDeleted} entries`}</p> }
+
       {Array.from(messageSet).map((obj, i) => {
         const titleId = `title${obj.id}`;
         const bodyId = `body${obj.id}`;

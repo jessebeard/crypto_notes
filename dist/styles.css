@@ -14,16 +14,31 @@ div.divider{
 
 label.input-label {
   display:block;
+  margin-top: 1rem;
+}
+
+input{
+  width: 100%;
+  max-width: 15rem;
+}
+textarea{
+  width: 100%;
+  max-width: 40rem;
 }
 
 form {
-  margin: 12%;
-  line-height: 1.5em;
+  margin-left: 12%;
+  margin-right: 12%;
+  line-height: .35em;
   background-color: aliceblue;
   border: 3px solid #f1f1f1;
   padding: 1rem;
   width:auto;
   height: auto;
+}
+
+.label-break{
+  line-height: .1em;
 }
 
 .messageTitle {
