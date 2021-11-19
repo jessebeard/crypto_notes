@@ -7,3 +7,11 @@ crypt.js
 dist/bundle.js
 yarn-error.log
 Press_Release.md
+
+.yarn/*
+!.yarn/cache
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions

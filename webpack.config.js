@@ -3,11 +3,18 @@ const path = require('path');
 const ESLintPlugin = require('eslint-webpack-plugin');
 
 module.exports = {
-  mode: 'development',
-  entry: `${__dirname}/src/index.jsx`,
+  mode: 'production',
+  entry: path.join(__dirname, 'src', 'index.jsx'),
   output: {
-    path: `${__dirname}/dist/`,
+    path: path.join(__dirname, 'dist'),
     filename: 'bundle.js',
+  },
+  devServer: {
+    static: {
+      directory: path.join(__dirname, 'test'),
+    },
+    port: 1338,
+    hot: true,
   },
   module: {
     rules: [
@@ -29,19 +36,6 @@ module.exports = {
             ],
           },
         },
-      },
-      {
-        test: /\.css$/i,
-        use: [
-          'style-loader',
-          {
-            loader: 'css-loader',
-            options: {
-              modules: true,
-            },
-          },
-        ],
-
       },
     ],
   },

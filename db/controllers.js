@@ -1,8 +1,8 @@
-const entry = require('./index.js');
+const Entry = require('./index.js');
 
 exports.saveEntry = (note, callback) => {
   console.log(note);
-  const newEntry = new entry(note);
+  const newEntry = new Entry(note);
   newEntry.save((err, success) => {
     if (err) {
       callback(err, null);
@@ -16,7 +16,7 @@ exports.saveEntry = (note, callback) => {
 };
 
 exports.getEntries = (library, callback) => {
-  entry.find({ library }, (err, docs) => {
+  Entry.find({ library }, (err, docs) => {
     if (err) {
       callback(err, null);
     } else {
@@ -28,7 +28,7 @@ exports.getEntries = (library, callback) => {
 };
 
 exports.updateDoc = (itemId, updateKey, updateValue, callback) => {
-  entry.findOneAndUpdate({ id: itemId },
+  Entry.findOneAndUpdate({ id: itemId },
     { $set: { [updateKey]: updateValue } }, { new: true, upsert: true },
     (err, item) => {
       if (err) {
@@ -40,7 +40,7 @@ exports.updateDoc = (itemId, updateKey, updateValue, callback) => {
 };
 
 exports.deleteEntry = (itemId, callback) => {
-  entry.findOneAndDelete({ _id: itemId }, (err, item) => {
+  Entry.findOneAndDelete({ _id: itemId }, (err, item) => {
     if (err) {
       callback(err, null);
     } else {
