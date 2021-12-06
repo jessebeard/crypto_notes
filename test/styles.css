@@ -6,11 +6,55 @@ button {
   margin: 0.5rem
 }
 
+/* delete button */
+button.delete-button {
+  width: fit-content;
+  height: fit-content;
+  border-radius: 100%;
+  border: none;
+  display: flex;
+  align-content: center;
+  position: relative;
+}
+.delete-button[hovertext]:hover::after,
+.delete-button[hovertext]:focus::after {
+  content: attr(hovertext);
+  position: absolute;
+  left: 0;
+  top: 24px;
+  min-width: 200px;
+  padding: .25rem;
+  font-size: 14px;
+  width: fit-content;
+  height: fit-content;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 10%;
+  /* Position the tooltip */
+  z-index: 1000;
+  bottom: 100%;  /* At the top of the tooltip */
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent black transparent;
+}
+
+
+.delete-icon{
+  fill:red
+}
+
+/* divider */
+
 div.divider{
   line-height: 1.5 em;
   padding: 0.5em;
   display: block;
 }
+
+
 
 label.input-label {
   display:block;
@@ -36,7 +80,16 @@ form {
   width:auto;
   height: auto;
 }
+table {
+  margin-left: 12%;
+  margin-right: 12%;
+}
 
+tr {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+}
 .label-break{
   line-height: .1em;
 }
@@ -51,4 +104,5 @@ font-weight: 800;
   font-size: medium;
   font-family: Arial, Helvetica, sans-serif;
   font-weight: 400;
+  flex: 100%;
   }

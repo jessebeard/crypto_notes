@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import SvgXDelete from '../svg/x-delete';
 
-const DeleteButton = ({rowId, action}) => {
+const DeleteButton = ({ rowId, action }) => {
   const [toDelete, setToDelete] = useState(false);
 
   const handleDelete = () => {
@@ -13,8 +14,8 @@ const DeleteButton = ({rowId, action}) => {
         .then((response) => {
           if (response.status === 200) {
             action(rowId);
-            //return response.json();
-          } else if (response.status === 500 ) {
+            // return response.json();
+          } else if (response.status === 500) {
             throw new Error('Something went wrong on api server!');
           }
         })
@@ -31,8 +32,10 @@ const DeleteButton = ({rowId, action}) => {
       <button
         type="button"
         onClick={handleDelete}
+        className="delete-button"
+        hovertext="This will permanently delete this note "
       >
-        x
+        <SvgXDelete />
       </button>
     </>
   );

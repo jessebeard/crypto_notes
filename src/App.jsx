@@ -7,6 +7,8 @@ import useInput from './utilities/useInput';
 import encrypt from './encryption/encrypt';
 import decrypt from './encryption/decrypt';
 import DeleteButton from './artifacts/DeleteButton';
+import ImportButton from './artifacts/ImportButton';
+
 /* **************************************************** *
  *                HELPER FUNCTIONS                      *
  * JS crypto.subtle stores things in array buffers,     *
@@ -191,139 +193,145 @@ const App = () => {
    * **************************************************** */
 
   return (
-    <form
-      onSubmit={(e) => handleSubmit(e)}
-      id="inputForm"
-    >
-      <label
-        className="input-label"
+    <>
+      <form
+        onSubmit={(e) => handleSubmit(e)}
+        id="inputForm"
       >
-        Library:
-      </label>
-      <br
-        className="label-break"
-      />
+        <ImportButton />
+        <label
+          className="input-label"
+        >
+          Library:
+        </label>
+        <br
+          className="label-break"
+        />
 
-      <input
-        required
-        type="text"
-        placeholder="e.g. Diary"
-        value={library}
-        onChange={setLibrary}
-        id="libraryInput"
-      />
-      <div className="divider" />
-      <label
-        className="input-label"
-        htmlFor="passwordInput"
-      >
-        Password:
-      </label>
-      <br
-        className="label-break"
-      />
-      <input
-        required
-        type="password"
-        placeholder="don't forget this!"
-        value={password}
-        onChange={setPassword}
-        id="passwordInput"
-      />
+        <input
+          required
+          type="text"
+          placeholder="e.g. Diary"
+          value={library}
+          onChange={setLibrary}
+          id="libraryInput"
+        />
+        <div className="divider" />
+        <label
+          className="input-label"
+          htmlFor="passwordInput"
+        >
+          Password:
+        </label>
+        <br
+          className="label-break"
+        />
+        <input
+          required
+          type="password"
+          placeholder="don't forget this!"
+          value={password}
+          onChange={setPassword}
+          id="passwordInput"
+        />
 
-      <div className="divider" />
-      <label
-        className="input-label"
-      >
-        Title:
-      </label>
-      <br
-        className="label-break"
-      />
-      <input
-        required
-        name="title"
-        type="text"
-        placeholder="entries are displayed chronologically"
-        value={title}
-        onChange={setTitle}
-        id="titleInput"
-      />
-      <div className="divider" />
-      <label
-        display="block"
-        className="input-label"
-        htmlFor="bodyInput"
-      >
-        Body
-      </label>
-      <br
-        className="label-break"
-      />
-      <textarea
-        required
-        type="text"
-        value={body}
-        onChange={setBody}
-        id="bodyInput"
-      />
-      <div className="divider" />
-      <div className="divider" />
-      <button
-        type="submit"
-        id="addEntry"
-      >
-        Submit
-      </button>
-      <button
-        type="button"
-        onClick={(e) => handleGet(e)}
-        id="retrieveEntries"
-      >
-        Get Notes and Decrypt
-      </button>
-      { numDecrypted === 0 && failedDecrypts === 0
-        && numEncrypted === 0 && <p>Enter a Library!</p> }
+        <div className="divider" />
+        <label
+          className="input-label"
+        >
+          Title:
+        </label>
+        <br
+          className="label-break"
+        />
+        <input
+          required
+          name="title"
+          type="text"
+          placeholder="entries are displayed chronologically"
+          value={title}
+          onChange={setTitle}
+          id="titleInput"
+        />
+        <div className="divider" />
+        <label
+          display="block"
+          className="input-label"
+          htmlFor="bodyInput"
+        >
+          Body
+        </label>
+        <br
+          className="label-break"
+        />
+        <textarea
+          required
+          type="text"
+          value={body}
+          onChange={setBody}
+          id="bodyInput"
+        />
+        <div className="divider" />
+        <div className="divider" />
+        <button
+          type="submit"
+          id="addEntry"
+        >
+          Submit
+        </button>
+        <button
+          type="button"
+          onClick={(e) => handleGet(e)}
+          id="retrieveEntries"
+        >
+          Get Notes and Decrypt
+        </button>
+        { numDecrypted === 0 && failedDecrypts === 0
+          && numEncrypted === 0 && <p>Enter a Library!</p> }
 
-      { numDecrypted > 0 && <p>{`decrypted ${numDecrypted} entries`}</p> }
+        { numDecrypted > 0 && <p>{`decrypted ${numDecrypted} entries`}</p> }
 
-      { failedDecrypts > 0 && <p>{`failed entries ${failedDecrypts} on the last run!`}</p> }
+        { failedDecrypts > 0 && <p>{`failed entries ${failedDecrypts} on the last run!`}</p> }
 
-      { numDecrypted === 0 && failedDecrypts > 0 && <p>try another password</p> }
+        { numDecrypted === 0 && failedDecrypts > 0 && <p>try another password</p> }
 
-      { numDecrypted === 0 && failedDecrypts === 0 && numEncrypted === 0
-      && queried === true && <p>There doesn&#39;t seem to be any notes in that Library!</p> }
+        { numDecrypted === 0 && failedDecrypts === 0 && numEncrypted === 0
+        && queried === true && <p>There doesn&#39;t seem to be any notes in that Library!</p> }
 
-      { numEncrypted > 0 && <p>{`encrypted and added ${numEncrypted}`}</p> }
+        { numEncrypted > 0 && <p>{`encrypted and added ${numEncrypted}`}</p> }
 
-      { numDeleted > 0 && <p>{`deleted ${numDeleted} entries`}</p> }
-
-      {Array.from(messageSet).map((obj, i) => {
-        const titleId = `title${obj.id}`;
-        const bodyId = `body${obj.id}`;
-        const deleteId = `delete${obj.id}`;
-        return (
-          <>
-            <p
-              className="messageTitle"
-              key={titleId}
-              id={titleId}
+        { numDeleted > 0 && <p>{`deleted ${numDeleted} entries`}</p> }
+      </form>
+      <table>
+        {Array.from(messageSet).map((obj, i) => {
+          const titleId = `title${obj.id}`;
+          const bodyId = `body${obj.id}`;
+          const deleteId = `delete${obj.id}`;
+          return (
+            <tr
+              rowid={obj.id}
             >
-              {obj.title}
-            </p>
-            <p
-              className="messageBody"
-              key={bodyId}
-              id={bodyId}
-            >
-              {obj.body}
-            </p>
-            <DeleteButton rowId={obj.id} action={deleteMessage} key={deleteId} />
-            {messages.length !== i - 1 && <div className="msgDivider"> </div>}
-          </>
-        );
-      })}
-    </form>
+              <p
+                className="messageTitle"
+                key={titleId}
+                id={titleId}
+              >
+                {obj.title}
+              </p>
+              <DeleteButton rowId={obj.id} action={deleteMessage} key={deleteId} />
+              {messages.length !== i - 1 && <div className="msgDivider"> </div>}
+              <p
+                className="messageBody"
+                key={bodyId}
+                id={bodyId}
+              >
+                {obj.body}
+              </p>
+            </tr>
+          );
+        })}
+      </table>
+    </>
   );
 };
 
