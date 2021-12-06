@@ -1,4 +1,4 @@
-const Entry = require('./index.js');
+const Entry = require('./index');
 
 exports.saveEntry = (note, callback) => {
   console.log(note);

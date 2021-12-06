@@ -39,7 +39,6 @@ button.delete-button {
   border-width: 5px;
   border-style: solid;
   border-color: transparent transparent black transparent;
-  animation-fill-mode: forwards;
 }
 
 
