@@ -42,7 +42,7 @@ function getKey(cryptoKey, salt) {
     {
       name: 'PBKDF2',
       salt,
-      iterations: 100000,
+      iterations: 300000,
       hash: 'SHA-256',
     },
     cryptoKey,

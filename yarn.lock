@@ -1271,7 +1271,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/runtime-corejs3@@^7.16.3, @babel/runtime-corejs3@npm:^7.10.2":
+"@babel/runtime-corejs3@npm:^7.10.2":
   version: 7.16.3
   resolution: "@babel/runtime-corejs3@npm:7.16.3"
   dependencies:
@@ -3273,7 +3273,6 @@ __metadata:
     "@babel/plugin-transform-runtime": ^7.10.1
     "@babel/preset-env": ^7.10.2
     "@babel/preset-react": ^7.12.13
-    "@babel/runtime-corejs3": "@^7.16.3"
     "@fontsource/roboto": ^4.5.1
     "@hot-loader/react-dom": ^17.0.1
     "@openid/appauth": ^1.1.1
