@@ -8,6 +8,7 @@ module.exports = {
   output: {
     path: path.join(__dirname, 'dist'),
     filename: 'bundle.js',
+    hashFunction: 'sha512'
   },
   devServer: {
     static: {
