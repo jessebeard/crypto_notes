@@ -1,0 +1,21 @@
+switch from using a Mongo test server to IndexedDB
+add some real CSS.
+make it so that password is **** but has a <(o)> button to see it.
+
+create unit tests:
+  > encodeMessage
+  > decodeMessage
+  > getKeyMaterial
+  > getKey
+  > encrypt
+  > decrypt
+
+convert App.jsx to async promise structure
+add React Router with seperate pages for
+  > encrypting or decrypting random messages
+  > view notebook
+  > add entry (secure) should use similar implementation of hide text as used for passwords
+
+
+add proton and Oauth
+work on integrating github & google (Sheets ideally)
