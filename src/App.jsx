@@ -1,338 +1,132 @@
-/* eslint-disable no-nested-ternary */
-/* eslint-disable no-console */
-/* eslint-disable comma-dangle */
-/* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { useState, useEffect } from 'react';
-import useInput from './utilities/useInput';
-import encrypt from './encryption/encrypt';
-import decrypt from './encryption/decrypt';
-import DeleteButton from './artifacts/DeleteButton';
-import ImportButton from './artifacts/ImportButton';
 
-/* **************************************************** *
- *                HELPER FUNCTIONS                      *
- * JS crypto.subtle stores things in array buffers,     *
- * this converts them to and from strings for storage,  *
- * and subsquent decryption                             *
- * **************************************************** */
-function arrayBufferToString(buf) {
-  return String.fromCharCode.apply(null, new Uint8Array(buf));
-}
-function stringToArrayBuffer(str) {
-  const buf = new ArrayBuffer(str.length);
-  const bufView = new Uint8Array(buf);
-  for (let i = 0, strLen = str.length; i < strLen; i += 1) {
-    bufView[i] = str.charCodeAt(i);
+function App() {
+  const [title, setTitle] = React.useState('');
+  const [message, setMessage] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [savedEntries, setSavedEntries] = React.useState([]);
+  let db;
+
+  function handleTitleChange(event) {
+    setTitle(event.target.value);
   }
-  return buf;
-}
 
-/* **************************************************** *
- *                  MAIN FUNCTION                       *
- * **************************************************** */
+  function handleMessageChange(event) {
+    setMessage(event.target.value);
+  }
 
-const App = () => {
-  const [library, setLibrary] = useInput('');
-  const [password, setPassword] = useInput('');
-  const [title, setTitle] = useInput('');
-  const [body, setBody] = useInput('');
-  const [messages, setMessages] = useState([]);
-  const [numDecrypted, setNumDecrypted] = useState(0);
-  const [numEncrypted, setNumEncrypted] = useState(0);
-  const [numDeleted, setNumDeleted] = useState(0);
-  const [currentLibrary, setCurrentLibrary] = useState('');
-  const [submit, setSubmit] = useState(false);
-  const [queried, setQueried] = useState(false);
+  function handlePasswordChange(event) {
+    setPassword(event.target.value);
+  }
 
-  /* *********************************************************
-   *               Encrypt & add                             *
-   ********************************************************* */
+  function handleSaveClick() {
+    // Create a new entry in the database
+    const entry = {
+      message: message,
+    };
+    const DBOpenRequest = indexedDB.open(title);
+    DBOpenRequest.onerror = (event) => {
+      console.error("Why didn't you allow my web app to use IndexedDB?!");
+    };
+    DBOpenRequest.onsuccess = (event) => {
+      console.log('here')
+      db = DBOpenRequest.result
+      console.log(db)
+      addData()
+    };
+    DBOpenRequest.onupgradeneeded = (event) => {
+      // Save the IDBDatabase interface
+      const dbInterface = event.target.result;
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    setSubmit(true);
-  };
-  useEffect(() => {
-    if (submit === false) return; // prevents useEffect runing twice
-    if (password === '') return;
-    (async () => {
-      const {
-        eTitle, eBody, iv, salt,
-      } = await encrypt(password, body, title);
-      const myHeaders = new Headers([
-        ['Content-Type', 'application/json'],
-      ]);
+      // Create an objectStore for this database
+      const objectStore = dbInterface.createObjectStore(title, {autoIncrement: true });
+    };
 
-      const myInit = {
-        method: 'POST',
-        headers: myHeaders,
-        body: JSON.stringify({
-          library,
-          iv: Array.from(iv.values()),
-          salt: Array.from(salt.values()),
-          title: arrayBufferToString(eTitle),
-          body: arrayBufferToString(eBody)
-        }),
+    function addData() {
+      // Create a new object to insert into the IDB
+      const newItem = [
+        {
+          message,
+        },
+      ];
+
+      // open a read/write db transaction, ready to add data
+
+      const transaction = db.transaction([title], "readwrite");
+
+      // report on the success of opening the transaction
+      transaction.oncomplete = (event) => {
+        console.log("<li>Transaction completed: database modification finished.</li>");
       };
-      const request = new Request('http://localhost:1337/submit/', myInit);
-      const response = await fetch(request);
-      if (response.status === 201) {
-        if (currentLibrary.length === 0) setCurrentLibrary(library);
-        return;
-      }
-      const responseJSON = await response.json();
-      const { id } = responseJSON;
-      console.log(responseJSON, id, 83, currentLibrary, library);
-      if (currentLibrary === library) {
-        setMessages((m) => [...m, { title, body, id }]);
-        setNumEncrypted((num) => (num + 1));
-      }
-      if (currentLibrary === '') {
-        setMessages([{ title, body, id }]);
-        setNumEncrypted(1);
-      }
-    })();
-    setSubmit(false);
-  }, [submit]);
 
-  /* **************************************************************
-  *                      Get & Decrypt                           *
-  ************************************************************** */
+      transaction.onerror = (event) => {
+        console.log("<li>Transaction not opened due to error. Duplicate items not allowed.</li>");
+      };
 
-  const [failedDecrypts, setFailedDecrypts] = useState(0);
-  const [getEntries, setGetEntries] = useState(false);
-  const handleGet = (event) => {
-    event.preventDefault();
-    setGetEntries(true);
-  };
-  async function fetchMessages(request) {
-    const response = await fetch(request);
-    if (response.status !== 200) {
-      throw new Error(`recieved code ${response.status}`);
-    }
-    const encryptedJSON = await response.json();
-    if (encryptedJSON.length === 0) {
-      setQueried(true);
-      setFailedDecrypts(0);
-      setNumDecrypted(0);
-      return;
-    }
-    const decryptingArray = [];
-    const rowIdArray = [];
-    for (let i = 0; i < encryptedJSON.length; i += 1) {
-      const entry = encryptedJSON[i]; // this is raw row recieved from the database
-      console.log(entry);
-      rowIdArray.push(entry.id);
+      // create an object store on the transaction
+      const objectStore = transaction.objectStore(title);
 
-      decryptingArray.push(decrypt( // title, body, fail
-        password,
-        new Uint8Array(entry.salt),
-        new Uint8Array(entry.iv),
-        stringToArrayBuffer(entry.title),
-        stringToArrayBuffer(entry.body)
-      ));
+      // add our newItem object to the object store
+      const objectStoreRequest = objectStore.add(newItem[0]);
+
+      objectStoreRequest.onsuccess = (event) => {
+        // report the success of the request (this does not mean the item
+        // has been stored successfully in the DB - for that you need transaction.oncomplete)
+        console.log("<li>Request successful.</li>");
+      };
     }
-    let decryptedArray = await Promise.allSettled(decryptingArray);
-    decryptedArray = decryptedArray.map((entry) => entry.value);
-    decryptedArray.forEach(([t, b, f], i) => {
-      const rowId = rowIdArray[i];
-      if (f === 0) {
-        setMessages((m) => [...m,
-          { title: t, body: b, id: rowId }]);
-        setNumDecrypted((num) => (num + 1));
-        setQueried(true);
-        setCurrentLibrary(library);
-      } else {
-        setFailedDecrypts((num) => num + 1);
-      }
-    });
+    handleGetClick()
   }
-  useEffect(() => {
-    if (password === '') {
-      return;
-    }
-    if (library !== currentLibrary) {
-      setFailedDecrypts(0);
-      setMessages([]);
-    }
-    const request = new Request(`http://localhost:1337/query/${library}`);
-    if (getEntries === true) { // prevents useEffect running twice
-      fetchMessages(request)
-        .catch((error) => console.log('error line 123', error));
-      setGetEntries(false);
-    }
-    setGetEntries(false);
-  }, [getEntries]);
 
-  /* *******************************************************************
-  *                       Remove Deletion                             *
-  ******************************************************************* */
-  // const [deleted, setDeleted] = useState(false);
-  const messageSet = new Set();
-  messages.forEach((m) => messageSet.add(m));
-  const deleteMessage = (m) => {
-    messageSet.forEach((entry) => {
-      if (entry.id === m) {
-        messageSet.delete(entry);
-        setMessages(Array.from(messageSet));
-        setNumDeleted((num) => (num + 1));
-      }
-    });
-    // setDeleted(true);
-  };
-  // useEffect(() => {
-  //   console.log('here 172', messageSet)
-  //   if (deleted === true) {
-  //     setMessages(Array.from(messageSet))
-  //     console.log('177', messageSet, messages)
-  // }
-  //   return () => { setDeleted(false); };
-  // }, [deleted, messages]);
-  /* **************************************************** *
-   *                   RENDER JSX                         *
-   * **************************************************** */
+  function handleGetClick() {
+    const DBOpenRequest = indexedDB.open(title);
+    console.log(DBOpenRequest)
+    DBOpenRequest.onerror = (event) => {
+      console.error("Why didn't you allow my web app to use IndexedDB?!");
+    };
+    DBOpenRequest.onsuccess = (event) => {
+      const transaction = event.target.result.transaction([title], 'readonly');
+      const objectStore = transaction.objectStore(title);
+
+      // Get all entries with the title entered
+      objectStore.getAll().onsuccess = (event) => {
+        setSavedEntries(event.target.result);
+      };
+    };
+    DBOpenRequest.onupgradeneeded = (event) => {
+      // Save the IDBDatabase interface
+      const dbInterface = event.target.result;
+
+      // Create an objectStore for this database
+      const objectStore = dbInterface.createObjectStore(title, {autoIncrement: true });
+    };
+  }
 
   return (
-    <>
-      <form
-        onSubmit={(e) => handleSubmit(e)}
-        id="inputForm"
-      >
-        <ImportButton />
-        <label
-          className="input-label"
-        >
-          Library:
-        </label>
-        <br
-          className="label-break"
-        />
+    <div>
+      <h1>Diary</h1>
+      <form>
+        <label htmlFor="title">Title</label>
+        <input type="text" id="title" value={title} onChange={handleTitleChange} />
 
-        <input
-          required
-          type="text"
-          placeholder="e.g. Diary"
-          value={library}
-          onChange={setLibrary}
-          id="libraryInput"
-        />
-        <div className="divider" />
-        <label
-          className="input-label"
-          htmlFor="passwordInput"
-        >
-          Password:
-        </label>
-        <br
-          className="label-break"
-        />
-        <input
-          required
-          type="password"
-          placeholder="don't forget this!"
-          value={password}
-          onChange={setPassword}
-          id="passwordInput"
-        />
+        <label htmlFor="message">Message</label>
+        <textarea id="message" value={message} onChange={handleMessageChange}></textarea>
 
-        <div className="divider" />
-        <label
-          className="input-label"
-        >
-          Title:
-        </label>
-        <br
-          className="label-break"
-        />
-        <input
-          required
-          name="title"
-          type="text"
-          placeholder="entries are displayed chronologically"
-          value={title}
-          onChange={setTitle}
-          id="titleInput"
-        />
-        <div className="divider" />
-        <label
-          display="block"
-          className="input-label"
-          htmlFor="bodyInput"
-        >
-          Body
-        </label>
-        <br
-          className="label-break"
-        />
-        <textarea
-          required
-          type="text"
-          value={body}
-          onChange={setBody}
-          id="bodyInput"
-        />
-        <div className="divider" />
-        <div className="divider" />
-        <button
-          type="submit"
-          id="addEntry"
-        >
-          Submit
-        </button>
-        <button
-          type="button"
-          onClick={(e) => handleGet(e)}
-          id="retrieveEntries"
-        >
-          Get Notes and Decrypt
-        </button>
-        { numDecrypted === 0 && failedDecrypts === 0
-          && numEncrypted === 0 && <p>Enter a Library!</p> }
-
-        { numDecrypted > 0 && <p>{`decrypted ${numDecrypted} entries`}</p> }
-
-        { failedDecrypts > 0 && <p>{`failed entries ${failedDecrypts} on the last run!`}</p> }
-
-        { numDecrypted === 0 && failedDecrypts > 0 && <p>try another password</p> }
-
-        { numDecrypted === 0 && failedDecrypts === 0 && numEncrypted === 0
-        && queried === true && <p>There doesn&#39;t seem to be any notes in that Library!</p> }
-
-        { numEncrypted > 0 && <p>{`encrypted and added ${numEncrypted}`}</p> }
-
-        { numDeleted > 0 && <p>{`deleted ${numDeleted} entries`}</p> }
+        <label htmlFor="password">Password (optional)</label>
+        <input type="password" id="password" value={password} onChange={handlePasswordChange} />
       </form>
-      <table>
-        {Array.from(messageSet).map((obj, i) => {
-          const titleId = `title${obj.id}`;
-          const bodyId = `body${obj.id}`;
-          const deleteId = `delete${obj.id}`;
-          return (
-            <tr
-              rowid={obj.id}
-            >
-              <p
-                className="messageTitle"
-                key={titleId}
-                id={titleId}
-              >
-                {obj.title}
-              </p>
-              <DeleteButton rowId={obj.id} action={deleteMessage} key={deleteId} />
-              {messages.length !== i - 1 && <div className="msgDivider"> </div>}
-              <p
-                className="messageBody"
-                key={bodyId}
-                id={bodyId}
-              >
-                {obj.body}
-              </p>
-            </tr>
-          );
-        })}
-      </table>
-    </>
+
+      <button onClick={handleSaveClick}>Save entry</button>
+      <button onClick={handleGetClick}>Get</button>
+      <h2>Saved entries:</h2>
+      {savedEntries.map(entry => (
+        <div key={entry.id}>
+          <h3>{entry.title}</h3>
+          <p>{entry.message}</p>
+        </div>
+      ))}
+    </div>
   );
-};
+}
 
 export default App;

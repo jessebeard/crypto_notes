@@ -2,8 +2,8 @@ const webpack = require('webpack');
 const path = require('path');
 const ESLintPlugin = require('eslint-webpack-plugin');
 
-module.exports = {
-  mode: 'production',
+const config = {
+  devtool: 'inline-source-map',
   entry: path.join(__dirname, 'src', 'index.jsx'),
   output: {
     path: path.join(__dirname, 'dist'),
@@ -14,8 +14,12 @@ module.exports = {
     static: {
       directory: path.join(__dirname, 'test'),
     },
+    compress: false,
     port: 1338,
-    hot: true,
+    devMiddleware: {
+      index: false, // specify to enable root proxying
+    },
+    watchFiles: ['src/App.jsx'],
   },
   module: {
     rules: [
@@ -60,3 +64,5 @@ module.exports = {
   },
   plugins: [new ESLintPlugin()],
 };
+
+module.exports = config

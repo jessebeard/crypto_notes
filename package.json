@@ -10,9 +10,9 @@
     "audit": "yarn audit",
     "clean": "rm dist/bundle.js",
     "deepclean": " rm -rf node_modules && rm yarn.lock && yarn cache clean",
-    "build-dev": "webpack build --mode development  --output-path ./test/ --watch",
+    "build-dev": "webpack --mode development --watch",
     "build-prod": "webpack -p --mode production",
-    "server:start": "nodemon ./server/index.js --ignore dist/ --ignore src/",
+    "server:start": "chokidar ./server/index.js --ignore dist/ --ignore src/",
     "start": "webpack-dev-server --hot --mode development"
   },
   "dependencies": {
