@@ -10,8 +10,3 @@ and in a second terminal instance
 ```sh
 yarn run start
 ```
-
-Acknowledgements:
-
-
-I found Google's AppAuth in Electron sample application very helpful to understand how to use both

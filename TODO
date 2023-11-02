@@ -1,7 +1,8 @@
-switch from using a Mongo test server to IndexedDB
-add some real CSS.
-make it so that password is **** but has a <(o)> button to see it.
+NOW
+extract functions and components, add callback for unit tests.
 
+SOON
+convert to async promise structure,
 create unit tests:
   > encodeMessage
   > decodeMessage
@@ -9,6 +10,14 @@ create unit tests:
   > getKey
   > encrypt
   > decrypt
+  > handleSaveClick
+  > handleGetClick
+  >
+
+make it so that password shows "****" but has a <(o)> button to see it.
+add some real CSS.
+
+
 
 convert App.jsx to async promise structure
 add React Router with seperate pages for
@@ -16,6 +25,7 @@ add React Router with seperate pages for
   > view notebook
   > add entry (secure) should use similar implementation of hide text as used for passwords
 
-
+add some real CSS.
 add proton and Oauth
 work on integrating github & google (Sheets ideally)
+add some real CSS.

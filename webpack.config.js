@@ -19,7 +19,7 @@ const config = {
     devMiddleware: {
       index: false, // specify to enable root proxying
     },
-    watchFiles: ['src/App.jsx'],
+    watchFiles: ['./src/App.jsx'],
   },
   module: {
     rules: [
